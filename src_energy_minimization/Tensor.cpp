@@ -102,6 +102,8 @@ int Tensor::getMagnetization()
 
 int Tensor::getMagnetizationPlane(int z)
 {
+    /* Used in our energy minimization study */
+    
     int magnetizationPlane = 0;
 
     for(int i = 0; i < nx; i++)
@@ -117,24 +119,13 @@ int Tensor::getMagnetizationPlane(int z)
 
 int Tensor::getSumMagnetizationPlanes()
 {
+    /* We use the sum of the plane's magnetizations as a criterium in the energy minimization study */
+
     int magnetization = 0;
-    int magnetizationPlane = 0;
 
     for(int k = 0; k < nz; k++)
     {
-
-        magnetizationPlane = 0;
-
-        for(int i = 0; i < nx; i++)
-        {
-            for(int j = 0; j < ny; j++)
-            {
-                magnetizationPlane += spins[i + nx * j + nx * ny * k];
-            }
-        }
-
-        magnetization += abs(magnetizationPlane); //Pour voir le caractère FM de chaque plan
-
+        magnetization += abs(spins.getMagnetizationPlane(k)); //Pour voir le caractère FM de chaque plan
     }
 
     return magnetization;
@@ -142,6 +133,8 @@ int Tensor::getSumMagnetizationPlanes()
 
 int Tensor::getAFMCriterium()
 {
+    /* We use this criterium in the energy minimization study */
+    
     int criterium = 0;
 
     for(int i = 0; i < nx; i++)
