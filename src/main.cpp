@@ -42,7 +42,7 @@ int main()
     double temperatureStep = 0.1;
     double Tinit = 15;
     double Tinf = 1;
-    int compteurT = 0;
+    int counterT = 0; // see far below where this counter is used
 
     /* Variables for output*/
     /* Energy */
@@ -79,7 +79,7 @@ int main()
 
     for(double J2 = J2init; J2 > J2final; J2 -= J2step)
     {
-        compteurT = 0;
+        counterT = 0; // see far below where this counter is used
         string label = "_J2=" + to_string(J2);
 
         /* Initialisation de rand */
@@ -146,7 +146,7 @@ int main()
             for(T = Tinit; T > Tinf; T -= temperatureStep)
             {
                 cout << "J2 : " << J2 << "; T : " << T << endl;
-                compteurT ++;
+                counterT ++;
 
                 /* We reinitialize the output variables */
                 E = 0;
@@ -299,7 +299,7 @@ int main()
                 }
 
                 /* We only plot for a few values of T so that the graph is not too ugly */
-                if(compteurT % 5 == 0)
+                if(counterT % 5 == 0)
                 {
                     for(int i = 0; i < nz; i++)
                     {
