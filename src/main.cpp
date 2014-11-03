@@ -128,7 +128,7 @@ int main()
             plot_stream << "#Parameters : J0 = J1 = " << J1 << "; J2 = " << J2 << "; number of steps = " << nombrePas << endl;
             Cv_stream << "#Temperature Cv" << endl;
             chi_stream << "#Temperature chi" << endl;
-            configuration_stream << "#z sumMagnetization" << endl;
+            configuration_stream << "#T z sumMagnetization" << endl;
 
             if(FM_AFM_choice == 1) //AFM
             {
@@ -303,7 +303,7 @@ int main()
                 {
                     for(int i = 0; i < nz; i++)
                     {
-                        configuration_stream << i << " " << 2 * sum_configuration[i] / nombrePas << " " << T << endl;
+                        configuration_stream << T << " " << i << " " << 2 * sum_configuration[i] / nombrePas << endl;
                     }
                     configuration_stream << endl;
                 }
