@@ -152,7 +152,7 @@ int main()
 
         for(int i = 0; i < number_bins; i++)
         {
-            gE_stream << E_min + i * deltaE << " " << entropy[i] << endl
+            gE_stream << E_min + i * deltaE << " " << entropy[i] << endl;
         }
 
         gE_stream.close()
