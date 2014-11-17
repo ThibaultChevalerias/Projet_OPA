@@ -45,7 +45,7 @@ int main()
     /* Energy bins */
     double E_max = nx * ny * nz * (4 * abs(J0) + 2 * abs(J1) + 2 * abs(J2)); // E_max = number of spins * maximum value taken by (4 * J0 + 2 * J1 + 2 * J2). This is an upper boundary.
     double E_min = - E_max;
-    int number_bins = 100; // We cut the energy interval in 100 bins
+    int const number_bins = 100; // We cut the energy interval in 100 bins
     double deltaE = (E_max - E_min) / number_bins;
     
     double currentEnergy = 0;
