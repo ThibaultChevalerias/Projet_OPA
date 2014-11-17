@@ -94,7 +94,7 @@ int main()
         while(lnf > epsilon)
         {
             currentEnergy = System.getEnergy(J0, J1, J2);
-            currentBin = locateBin(E_min, E_max, number_bins, currentEnergy);
+            currentBin = locateBin(deltaE, currentEnergy);
             
             while(flatness < flatness_limit && step < step_max)
             {
@@ -104,7 +104,7 @@ int main()
                 zChosen = rand() % nz;
                     
                 proposedEnergy = currentEnergy + System.getDeltaE(xChosen, yChosen, zChosen, J0, J1, J2);
-                proposedBin = locateBin(E_min, E_max, number_bins, proposedEnergy);
+                proposedBin = locateBin(deltaE, proposedEnergy);
                 
                 /* Acceptance of the new state */
                 random_double = (rand() % random_range + 1) / random_range;
