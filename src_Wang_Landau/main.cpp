@@ -52,7 +52,6 @@ int main()
     double currentEnergy = 0;
     double proposedEnergy = 0;
 
-
     /* Histogram and entropy for the Wang-Landau algorithm */
     int DOS[number_bins]; // Density Of energy States
     for(int i = 0; i < number_bins; i++)
@@ -66,6 +65,10 @@ int main()
     }
     
     /* Declaration of streams (data output) */
+
+    string const gE_file("g(E).dat");
+
+    ofstream gE_stream(gE_file.c_str());
 
     /* Initialization of the tensor of states */
     
