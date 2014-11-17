@@ -27,7 +27,7 @@ int main()
     
     /* Wang-Landau parameters */
     double lnf = 1;
-    double epsilon = 1/64; // à modifier ?
+    double epsilon = 1.0/64; // à modifier ?
     
     double flatness_limit = 0.9; // When we reach this limit, we consider the histogram as flat, and change the value of f.
     
