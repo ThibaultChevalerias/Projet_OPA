@@ -64,11 +64,14 @@ int main()
         entropy[i] = 0; // Initialization
     }
 
-    /* Initialization of the tensor of states */
+    int currentBin = 0; // in order to know in which bin our current energy is
+    int proposedBin = 0; // idem for the proposed energy
     
-    Tensor States(nx, ny, nz);
+    /* Initialization of the system */
     
-    States.init();
+    Tensor System(nx, ny, nz);
+    
+    System.init();
     
     /* Declaration of streams (data output) */
 
@@ -76,6 +79,10 @@ int main()
 
     ofstream gE_stream(gE_file.c_str());
 
+    /* Initialization of rand */
+    
+    srand(time(NULL));
+    
     if(gE_stream)
     {
         /* =============================================================== */
@@ -86,18 +93,39 @@ int main()
     
         while(lnf > epsilon)
         {
-            currentEnergy = States.getEnergy(J0, J1, J2);
-    
+            currentEnergy = System.getEnergy(J0, J1, J2);
+            currentBin = locateBin(E_min, E_max, number_bins, currentEnergy);
+            
             while(flatness < flatness_limit && step < step_max)
             {
+                /* We propose a new state */
+                xChosen = rand() % nx;
+                yChosen = rand() % ny;
+                zChosen = rand() % nz;
+                    
+                proposedEnergy = currentEnergy + System.getDeltaE(xChosen, yChosen, zChosen, J0, J1, J2);
+                proposedBin = locateBin(E_min, E_max, number_bins, proposedEnergy);
+                
+                /* Acceptance of the new state */
+                random_double = (rand() % random_range + 1) / random_range;
             
-                /* Changement d'état */
-            
-            
+                if(log(random_double) < (entropy[currentBin] - entropy[proposedBin])
+                {
+                    // if accepted, update the energy and the system:
+                    currentEnergy = proposedEnergy;
+                    System.switchValue(xChosen, yChosen, zChosen);
+                }
+                // if rejected, nothing changes (same energy, same system)
+                
+                DOS[currentEnergy] += 1;
+                entropy[currentEnergy] += lnf;
+                
+                flatness = getFlatness(&DOS[0]);
             
             } // end while(flatness < flatness_limit && step < step_max)
         
             lnf /= 2; // We reduce f until f < epsilon
+            // DOS = 0 ??? (cf. wikipedia)
 
         } // end  while(lnf > epsilon)
 
