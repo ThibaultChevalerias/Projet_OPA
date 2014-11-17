@@ -47,7 +47,12 @@ int main()
     double E_max = nx * ny * nz * (4 * abs(J0) + 2 * abs(J1) + 2 * abs(J2)); // E_max = number of spins * maximum value taken by (4 * J0 + 2 * J1 + 2 * J2). This is an upper boundary.
     double E_min = - E_max;
     int number_bins = 100; // We cut the energy interval in 100 bins
+    double deltaE = (E_max - E_min) / number_bins;
     
+    double currentEnergy = 0;
+    double proposedEnergy = 0;
+
+
     /* Histogram and entropy for the Wang-Landau algorithm */
     int DOS[number_bins]; // Density Of energy States
     for(int i = 0; i < number_bins; i++)
@@ -60,13 +65,14 @@ int main()
         entropy[i] = 0; // Initialization
     }
     
+    /* Declaration of streams (data output) */
+
     /* Initialization of the tensor of states */
     
     Tensor States(nx, ny, nz);
     
     States.init();
     
-    //plop
     /* =============================================================== */
     /* ==================== Wang-Landau algorithm ==================== */
     /* =============================================================== */
