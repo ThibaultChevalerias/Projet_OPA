@@ -101,7 +101,16 @@ int main()
 
         } // end  while(lnf > epsilon)
 
+        /* Writing output */
 
+        gE_stream << "#E_bin_min g(E)" << endl;
+
+        for(int i = 0; i < number_bins; i++)
+        {
+            gE_stream << E_min + i * deltaE << " " << DOS[i] << endl
+        }
+
+        gE_stream.close()
 
     }//end if(gE_stream)
     else
