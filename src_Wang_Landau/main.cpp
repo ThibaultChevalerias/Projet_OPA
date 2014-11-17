@@ -76,6 +76,9 @@ int main()
     {
         while(flatness < flatness_limit && step < step_max)
         {
+            /* Changement d'état */
+            
+            
             
         } // end while(flatness < flatness_limit && step < step_max)
         
