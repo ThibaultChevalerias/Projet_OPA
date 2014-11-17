@@ -16,9 +16,9 @@ int mod(int a, int b) // We assume b to be positive and a to vary between -2 and
     }
 }
 
-int locateBin(double deltaE, double energy)
+int locateBin(double E_min, double deltaE, double energy)
 {
-    return floor(energy / deltaE); // euclidian division of energy by deltaE to find in which bin "energy" is
+    return floor((energy - E_min) / deltaE); // euclidian division of energy by deltaE to find in which bin "energy" is. We add (-E_min) in order to have a positive number and divide it by deltaE to get a number between 0 and number_bins - 1
 }
 
 int getMax(vector<int>& table) // It only works for integer tables

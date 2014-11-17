@@ -88,7 +88,7 @@ int main()
             cout << "lnf = " << lnf << endl;
             
             currentEnergy = System.getEnergy(J0, J1, J2);
-            currentBin = locateBin(deltaE, currentEnergy);
+            currentBin = locateBin(E_min, deltaE, currentEnergy);
             
             step = 0;
             
@@ -100,7 +100,7 @@ int main()
                 zChosen = rand() % nz;
                 
                 proposedEnergy = currentEnergy + System.getDeltaE(xChosen, yChosen, zChosen, J0, J1, J2);
-                proposedBin = locateBin(deltaE, proposedEnergy);
+                proposedBin = locateBin(E_min, deltaE, proposedEnergy);
                 
                 /* Acceptance of the new state */
                 random_double = (rand() % random_range + 1) / random_range;
