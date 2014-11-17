@@ -6,7 +6,7 @@
 using namespace std;
 
 int mod(int a, int b);
-int locateBin(double deltaE, double energy);
+int locateBin(double E_min, double deltaE, double energy);
 int getMax(vector<int>& table);
 int getMin(vector<int>& table);
 double getMean(vector<int>& table);
