@@ -92,6 +92,8 @@ int main()
     
         while(lnf > epsilon)
         {
+            cout << "lnf = " << lnf << endl;
+
             currentEnergy = System.getEnergy(J0, J1, J2);
             currentBin = locateBin(deltaE, currentEnergy);
             
