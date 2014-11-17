@@ -63,12 +63,6 @@ int main()
     {
         entropy[i] = 0; // Initialization
     }
-    
-    /* Declaration of streams (data output) */
-
-    string const gE_file("g(E).dat");
-
-    ofstream gE_stream(gE_file.c_str());
 
     /* Initialization of the tensor of states */
     
@@ -76,25 +70,43 @@ int main()
     
     States.init();
     
-    /* =============================================================== */
-    /* ==================== Wang-Landau algorithm ==================== */
-    /* =============================================================== */
-    
-    cout << "Wait while the simulation is running..." << endl;
-    
-    while(lnf > epsilon)
+    /* Declaration of streams (data output) */
+
+    string const gE_file("g(E).dat");
+
+    ofstream gE_stream(gE_file.c_str());
+
+    if(gE_stream)
     {
-        currentEnergy = States.getEnergy(J0, J1, J2);
+        /* =============================================================== */
+        /* ==================== Wang-Landau algorithm ==================== */
+        /* =============================================================== */
     
-        while(flatness < flatness_limit && step < step_max)
+        cout << "Wait while the simulation is running..." << endl;
+    
+        while(lnf > epsilon)
         {
+            currentEnergy = States.getEnergy(J0, J1, J2);
+    
+            while(flatness < flatness_limit && step < step_max)
+            {
             
-            /* Changement d'état */
+                /* Changement d'état */
             
             
             
-        } // end while(flatness < flatness_limit && step < step_max)
+            } // end while(flatness < flatness_limit && step < step_max)
         
-        lnf /= 2; // We reduce f until f < epsilon
-    } // end  while(lnf > epsilon)
+            lnf /= 2; // We reduce f until f < epsilon
+
+        } // end  while(lnf > epsilon)
+
+
+
+    }//end if(gE_stream)
+    else
+    {
+        cout << "error while opening g(E).dat" << endl;
+    }
+
 }
