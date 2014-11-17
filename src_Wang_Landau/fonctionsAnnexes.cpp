@@ -21,7 +21,7 @@ int locateBin(double deltaE, double energy)
     return floor(energy / deltaE); // euclidian division of energy by deltaE to find in which bin "energy" is
 }
 
-int getMax(int *table, int size) // It only works for integer tables
+int getMax(int table, int size) // It only works for integer tables
 {
     double max = *table[0];
 
@@ -36,7 +36,7 @@ int getMax(int *table, int size) // It only works for integer tables
 
 }
 
-int getMin(int *table, int size) // It only works for integer tables
+int getMin(int table, int size) // It only works for integer tables
 {
     double min = *table[0];
 
@@ -51,7 +51,7 @@ int getMin(int *table, int size) // It only works for integer tables
 
 }
 
-double getMean(int *table, int size) // /!\ eliminates the 0 values in the table from the computation
+double getMean(int table, int size) // /!\ eliminates the 0 values in the table from the computation
 {
     double mean = 0;
     int count = 0;
@@ -77,7 +77,7 @@ double getMean(int *table, int size) // /!\ eliminates the 0 values in the table
 }
 
 
-bool isFlat(double flatness_limit, int *visits, int size) // It only works for integer tables
+bool isFlat(double flatness_limit, int visits, int size) // It only works for integer tables
 {
     double mean = 0;
     double range = 0;
