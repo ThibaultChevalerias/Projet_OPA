@@ -1,6 +1,10 @@
 #ifndef FONCTIONSANNEXES_H_INCLUDED
 #define FONCTIONSANNEXES_H_INCLUDED
 
+#include <vector>
+
+using namespace std;
+
 int mod(int a, int b);
 int locateBin(double deltaE, double energy);
 int getMax(vector<int>& table);
