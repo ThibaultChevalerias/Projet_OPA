@@ -155,7 +155,7 @@ int main()
             gE_stream << E_min + i * deltaE << " " << entropy[i] << endl;
         }
         
-        gE_stream.close()
+        gE_stream.close();
     
     }//end if(gE_stream)
     else
