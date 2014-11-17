@@ -3,9 +3,9 @@
 
 int mod(int a, int b);
 int locateBin(double deltaE, double energy);
-int getMax(int table, int size);
-int getMin(int table, int size);
-double getMean(int table, int size);
-bool isFlat(double flatness_limit, int visits, int size);
+int getMax(vector<int>& table);
+int getMin(vector<int>& table);
+double getMean(vector<int>& table);
+bool isFlat(double flatness_limit, vector<int>& visits);
 
 #endif // FONCTIONSANNEXES_H_INCLUDED

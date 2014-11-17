@@ -4,6 +4,7 @@
 #include <cmath>
 #include <fstream>
 #include <string>
+#include <vector>
 #include "fonctionsAnnexes.h"
 #include "Tensor.h"
     
@@ -52,16 +53,8 @@ int main()
     double proposedEnergy = 0;
     
     /* Histogram and entropy for the Wang-Landau algorithm */
-    int visits[number_bins]; // Histogram of visits of each bin
-    for(int i = 0; i < number_bins; i++)
-    {
-        visits[i] = 0; // Initialization
-    }
-    double entropy[number_bins]; // Entropy for each energy
-    for(int i = 0; i < number_bins; i++)
-    {
-        entropy[i] = 0; // Initialization
-    }
+    vector<int> visits (number_bins,0); // Histogram of visits of each bin, initialized with zeros
+    vector<double> entropy(number_bins,0); // Entropy for each energy, initialized with zeros
     
     int currentBin = 0; // in order to know in which bin our current energy is
     int proposedBin = 0; // idem for the proposed energy
@@ -125,7 +118,7 @@ int main()
                 
                 if(step % 10000) // A modifier ??????????????????????????????????
                 {
-                    if(isFlat(flatness_limit, &visits[0], sizeof(visits)/sizeof(visits[0])))
+                    if(isFlat(flatness_limit, visits))
                     {
                         break;
                     }

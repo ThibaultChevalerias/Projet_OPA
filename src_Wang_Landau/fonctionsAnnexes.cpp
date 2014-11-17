@@ -21,44 +21,44 @@ int locateBin(double deltaE, double energy)
     return floor(energy / deltaE); // euclidian division of energy by deltaE to find in which bin "energy" is
 }
 
-int getMax(int table, int size) // It only works for integer tables
+int getMax(vector<int>& table) // It only works for integer tables
 {
-    double max = *table[0];
+    double max = table[0];
 
-    for(int i = 1; i < size; i++)
+    for(int i = 1; i < table.size(); i++)
     {
-        if(max < *table[i])
+        if(max < table[i])
         {
-            max = *table[i];
+            max = table[i];
         }
     }
     return max;
 
 }
 
-int getMin(int table, int size) // It only works for integer tables
+int getMin(vector<int>& table) // It only works for integer tables
 {
-    double min = *table[0];
+    double min = table[0];
 
-    for(int i = 1; i < size; i++)
+    for(int i = 1; i < table.size(); i++)
     {
-        if(min > *table[i])
+        if(min > table[i])
         {
-            min = *table[i];
+            min = table[i];
         }
     }
     return min;
 
 }
 
-double getMean(int table, int size) // /!\ eliminates the 0 values in the table from the computation
+double getMean(vector<int>& table) // /!\ eliminates the 0 values in the table from the computation
 {
     double mean = 0;
     int count = 0;
 
-    for(int i = 0; i < size; i++)
+    for(int i = 0; i < table.size(); i++)
     {
-        if(*table[i] != 0)
+        if(table[i] != 0)
         {
             mean += table[i];
             count++;
@@ -77,14 +77,14 @@ double getMean(int table, int size) // /!\ eliminates the 0 values in the table 
 }
 
 
-bool isFlat(double flatness_limit, int visits, int size) // It only works for integer tables
+bool isFlat(double flatness_limit, vector<int>& visits) // It only works for integer tables
 {
     double mean = 0;
     double range = 0;
 
-    mean = getMean(visits,size);
+    mean = getMean(visits);
 
-    range = getMax(visits,size) - getMin(visits,size);
+    range = getMax(visits) - getMin(visits);
 
     if(1-(range/mean) > flatness_limit)
     {
