@@ -11,7 +11,10 @@ using namespace std;
 
 int main()
 {
-    /* Declaration of variables */
+    /* ================================================================== */
+    /* ==================== Declaration of variables ==================== */
+    /* ================================================================== */
+
     int nx = 5;
     int ny = 5;
     int nz = 5;
@@ -21,6 +24,7 @@ int main()
     double J1 = 1;
     double J2 = -1;
     
+    /* Wang-Landau parameters */
     double lnf = 1;
     double epsilon = 1/64; // à modifier ?
     
@@ -40,9 +44,31 @@ int main()
     int random_range = 100000000; // float precision (1E8)
     
     /* Energy bins */
-    /* A COMPLETER E_min = 
-    E_max = */
-    number_bins = 100; // We cut the energy interval in 100 bins
+    double E_max = nx * ny * nz * (4 * abs(J0) + 2 * abs(J1) + 2 * abs(J2)); // E_max = number of spins * maximum value taken by (4 * J0 + 2 * J1 + 2 * J2). This is an upper boundary.
+    double E_min = - E_max;
+    int number_bins = 100; // We cut the energy interval in 100 bins
+    
+    /* Histogram and entropy for the Wang-Landau algorithm */
+    int DOS[number_bins]; // Density Of energy States
+    for(int i = 0; i < number_bins; i++)
+    {
+        DOS[i] = 0; // Initialization
+    }
+    double entropy[number_bins]; // Entropy for each energy
+    for(int i = 0; i < number_bins; i++)
+    {
+        entropy[i] = 0; // Initialization
+    }
+    
+    /* Initialization of the tensor of states */
+    
+    Tensor States(nx, ny, nz);
+    
+    States.init();
+    
+    /* =============================================================== */
+    /* ==================== Wang-Landau algorithm ==================== */
+    /* =============================================================== */
     
     cout << "Wait while the simulation is running..." << endl;
     
@@ -51,8 +77,8 @@ int main()
         while(flatness < flatness_limit && step < step_max)
         {
             
-        }
+        } // end while(flatness < flatness_limit && step < step_max)
         
         lnf /= 2; // We reduce f until f < epsilon
-    }
+    } // end  while(lnf > epsilon)
 }
