@@ -6,15 +6,15 @@
 #include <string>
 #include "fonctionsAnnexes.h"
 #include "Tensor.h"
-
+    
 using namespace std;
-
+    
 int main()
 {
     /* ================================================================== */
     /* ==================== Declaration of variables ==================== */
     /* ================================================================== */
-
+    
     int nx = 5;
     int ny = 5;
     int nz = 5;
@@ -50,7 +50,7 @@ int main()
     
     double currentEnergy = 0;
     double proposedEnergy = 0;
-
+    
     /* Histogram and entropy for the Wang-Landau algorithm */
     int visits[number_bins]; // Histogram of visits of each bin
     for(int i = 0; i < number_bins; i++)
@@ -62,7 +62,7 @@ int main()
     {
         entropy[i] = 0; // Initialization
     }
-
+    
     int currentBin = 0; // in order to know in which bin our current energy is
     int proposedBin = 0; // idem for the proposed energy
     
@@ -73,11 +73,11 @@ int main()
     System.init();
     
     /* Declaration of streams (data output) */
-
+    
     string const gE_file("g(E).dat");
-
+    
     ofstream gE_stream(gE_file.c_str());
-
+    
     /* Initialization of rand */
     
     srand(time(NULL));
@@ -87,13 +87,13 @@ int main()
         /* =============================================================== */
         /* ==================== Wang-Landau algorithm ==================== */
         /* =============================================================== */
-    
+        
         cout << "Wait while the simulation is running..." << endl;
-    
+        
         while(lnf > epsilon)
         {
             cout << "lnf = " << lnf << endl;
-
+            
             currentEnergy = System.getEnergy(J0, J1, J2);
             currentBin = locateBin(deltaE, currentEnergy);
             
@@ -105,13 +105,13 @@ int main()
                 xChosen = rand() % nx;
                 yChosen = rand() % ny;
                 zChosen = rand() % nz;
-                    
+                
                 proposedEnergy = currentEnergy + System.getDeltaE(xChosen, yChosen, zChosen, J0, J1, J2);
                 proposedBin = locateBin(deltaE, proposedEnergy);
                 
                 /* Acceptance of the new state */
                 random_double = (rand() % random_range + 1) / random_range;
-            
+                
                 if(log(random_double) < (entropy[currentBin] - entropy[proposedBin]))
                 {
                     // if accepted, update the energy and the system:
@@ -120,8 +120,8 @@ int main()
                 }
                 // if rejected, nothing changes (same energy, same system)
                 
-                visits[currentEnergy] ++;
-                entropy[currentEnergy] += lnf;
+                visits[currentBin] ++;
+                entropy[currentBin] += lnf;
                 
                 if(step % 10000) // A modifier ??????????????????????????????????
                 {
@@ -132,31 +132,31 @@ int main()
                 }
                 
                 step++;
-                
+            
             } // end while(flatness < flatness_limit && step < step_max)
             
             for(int i = 0; i < number_bins; i++)
             {
                 visits[i] = 0; // We reinitialize the histogram of visits
             }
-    
+            
             lnf /= 2; // We reduce f until f < epsilon
-
+        
         } // end  while(lnf > epsilon)
-
+        
         /* ======================================================== */
         /* ==================== Writing output ==================== */
         /* ======================================================== */
-
+        
         gE_stream << "#E_bin_min g(E)" << endl;
-
+        
         for(int i = 0; i < number_bins; i++)
         {
             gE_stream << E_min + i * deltaE << " " << entropy[i] << endl;
         }
-
+        
         gE_stream.close()
-
+    
     }//end if(gE_stream)
     else
     {
