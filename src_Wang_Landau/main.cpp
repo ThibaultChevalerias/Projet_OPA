@@ -112,7 +112,7 @@ int main()
                 /* Acceptance of the new state */
                 random_double = (rand() % random_range + 1) / random_range;
             
-                if(log(random_double) < (entropy[currentBin] - entropy[proposedBin])
+                if(log(random_double) < (entropy[currentBin] - entropy[proposedBin]))
                 {
                     // if accepted, update the energy and the system:
                     currentEnergy = proposedEnergy;
