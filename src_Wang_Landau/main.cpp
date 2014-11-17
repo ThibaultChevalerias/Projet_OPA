@@ -81,8 +81,11 @@ int main()
     
     while(lnf > epsilon)
     {
+        currentEnergy = States.getEnergy(J0, J1, J2);
+    
         while(flatness < flatness_limit && step < step_max)
         {
+            
             /* Changement d'état */
             
             
