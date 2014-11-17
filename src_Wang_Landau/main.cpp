@@ -28,7 +28,6 @@ int main()
     double lnf = 1;
     double epsilon = 1/64; // à modifier ?
     
-    double flatness = 0; // flatness of the histogram
     double flatness_limit = 0.9; // When we reach this limit, we consider the histogram as flat, and change the value of f.
     
     int step = 0;
@@ -53,10 +52,10 @@ int main()
     double proposedEnergy = 0;
 
     /* Histogram and entropy for the Wang-Landau algorithm */
-    int DOS[number_bins]; // Density Of energy States
+    int visits[number_bins]; // Histogram of visits of each bin
     for(int i = 0; i < number_bins; i++)
     {
-        DOS[i] = 0; // Initialization
+        visits[i] = 0; // Initialization
     }
     double entropy[number_bins]; // Entropy for each energy
     for(int i = 0; i < number_bins; i++)
@@ -96,7 +95,9 @@ int main()
             currentEnergy = System.getEnergy(J0, J1, J2);
             currentBin = locateBin(deltaE, currentEnergy);
             
-            while(flatness < flatness_limit && step < step_max)
+            step = 0;
+            
+            while(step < (step_max / sqrt(lnf)))
             {
                 /* We propose a new state */
                 xChosen = rand() % nx;
@@ -117,15 +118,27 @@ int main()
                 }
                 // if rejected, nothing changes (same energy, same system)
                 
-                DOS[currentEnergy] += 1;
+                visits[currentEnergy] ++;
                 entropy[currentEnergy] += lnf;
                 
-                flatness = getFlatness(&DOS[0]);
-            
+                if(step % 10000) // A modifier ??????????????????????????????????
+                {
+                    if(isFlat(flatness_limit, &visits[0], sizeof(visits)/sizeof(visits[0])))
+                    {
+                        break;
+                    }
+                }
+                
+                step++;
+                
             } // end while(flatness < flatness_limit && step < step_max)
-        
+            
+            for(int i = 0; i < number_bins; i++)
+            {
+                visits[i] = 0; // We reinitialize the histogram of visits
+            }
+    
             lnf /= 2; // We reduce f until f < epsilon
-            // DOS = 0 ??? (cf. wikipedia)
 
         } // end  while(lnf > epsilon)
 
@@ -137,7 +150,7 @@ int main()
 
         for(int i = 0; i < number_bins; i++)
         {
-            gE_stream << E_min + i * deltaE << " " << DOS[i] << endl
+            gE_stream << E_min + i * deltaE << " " << entropy[i] << endl
         }
 
         gE_stream.close()
