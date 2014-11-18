@@ -27,12 +27,12 @@ int main()
     
     /* Wang-Landau parameters */
     double lnf = 1;
-    double epsilon = 1.0/64; // à modifier ?
+    double epsilon = 1.0/8; // à modifier ?????
     
-    double flatness_limit = 0.9; // When we reach this limit, we consider the histogram as flat, and change the value of f.
+    double flatness_limit = 0.5; // When we reach this limit, we consider the histogram as flat, and change the value of f.
     
     int step = 0;
-    int step_max = 1000000; // Maximum number of steps allowed for the flatness to pass above flatness_limit
+    int step_max = 100000; // Maximum number of steps allowed for the flatness to pass above flatness_limit
     
     /* Variables to choose a random spin */
     int xChosen = 0;
@@ -40,11 +40,13 @@ int main()
     int zChosen = 0;
     
     /* Variables randomly generated */
+    int random_int = 0;
     double random_double = 0;
-    int random_range = 100000000; // float precision (1E8)
+    int random_range_int = 100000000;
+    double random_range = 100000000; // float precision (1e8)
     
     /* Energy bins */
-    double E_max = nx * ny * nz * (4 * abs(J0) + 2 * abs(J1) + 2 * abs(J2)); // E_max = number of spins * maximum value taken by (4 * J0 + 2 * J1 + 2 * J2). This is an upper boundary.
+    double E_max = 1000; // E_max = number of spins * maximum value taken by (4 * J0 + 2 * J1 + 2 * J2). This is an upper boundary.
     double E_min = - E_max;
     int const number_bins = 100; // We cut the energy interval in 100 bins
     double deltaE = (E_max - E_min) / number_bins;
@@ -86,14 +88,14 @@ int main()
         while(lnf > epsilon)
         {
             cout << "lnf = " << lnf << endl;
-            
-            currentEnergy = System.getEnergy(J0, J1, J2);
-            currentBin = locateBin(E_min, deltaE, currentEnergy);
-            
+
             step = 0;
             
             while(step < (step_max / sqrt(lnf)))
             {
+                currentEnergy = System.getEnergy(J0, J1, J2);
+                currentBin = locateBin(E_min, deltaE, currentEnergy);
+
                 /* We propose a new state */
                 xChosen = rand() % nx;
                 yChosen = rand() % ny;
@@ -103,28 +105,33 @@ int main()
                 proposedBin = locateBin(E_min, deltaE, proposedEnergy);
                 
                 /* Acceptance of the new state */
-                random_double = (rand() % random_range + 1) / random_range;
-                
+                random_int = (rand() % random_range_int + 1); // /!\ the algebraic operations with rand() have to be performed with integers.
+                random_double = random_int / random_range;
                 if(log(random_double) < (entropy[currentBin] - entropy[proposedBin]))
                 {
                     // if accepted, update the energy and the system:
                     currentEnergy = proposedEnergy;
                     System.switchValue(xChosen, yChosen, zChosen);
+                    visits[proposedBin] ++;
+                    entropy[proposedBin] += lnf;
                 }
-                // if rejected, nothing changes (same energy, same system)
-                
-                visits[currentBin] ++;
-                entropy[currentBin] += lnf;
-                
-                if(step % 10000 == 0) // A modifier ??????????????????????????????????
+                else
                 {
-                    if(isFlat(flatness_limit, visits))
-                    {
-                        break;
-                    }
+                    visits[currentBin] ++;
+                    entropy[currentBin] += lnf;
                 }
                 
                 step++;
+
+                if(step % 10000 == 0) // A modifier ??????????????????????????????????
+                {
+                    cout << step << endl;
+                    if(isFlat(flatness_limit, visits))
+                    {
+                        cout << "The histogram is flat enough" << endl;
+                        break;
+                    }
+                } 
             
             } // end while(flatness < flatness_limit && step < step_max)
             
