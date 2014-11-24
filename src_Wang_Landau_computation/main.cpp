@@ -36,7 +36,9 @@ int main()
             gE.push_back(pair<double, double>(energy_temp, gE_temp));
         }
 
-    }
+        read_stream.close();
+
+    } // end of if(read_stream)
     else
     {
         cout << "Error while reading g(E) file !!!" << endl;
@@ -47,9 +49,40 @@ int main()
     /* =================== Computation of Cv ==================== */
     /* ========================================================== */
 
-    for(int i = 0; i < 50; i ++)
+    int Tinit = 1; //Initial temperature (implicit kbT with kb=1)
+    int Tfinal = 100; // Final temperature (implicit kbT with kb=1)
+    int Tstep = 1; // Temperature step (implicit kbT with kb=1)
+
+    int Cv = 0;
+
+    string const Cv_file("Cv.dat");
+    ofstream Cv_stream(Cv_file.c_str());
+
+    if(Cv_stream)
     {
-        cout << gE[i].first << " " << gE[i].second << endl;
+        Cv_stream << "#T Cv" << endl;
+
+        for(int T = Tinit; T < Tfinal; T += Tstep)
+        {
+            Cv = 0; // reinitialisation of the value of Cv for each temperature
+
+            for(int i = 0; i < gE.size(); i++)
+            {
+
+                Cv += gE[i].first * gE[i].first * gE[i].second * exp(- gE[i].first / T) / (T * T);
+
+            }
+
+            Cv_stream << T << " " << Cv << endl;
+
+        } // end of for(int T = Tinit; T < Tfinal; T += Tstep)
+
+        Cv_stream.close();
+
+    } // end of if(Cv_stream)
+    else
+    {
+        cout << "Error while writing Cv.dat file !!!" << endl;
     }
 
     system("PAUSE");
