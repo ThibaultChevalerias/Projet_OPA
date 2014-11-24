@@ -53,6 +53,7 @@ int main()
     double Tfinal = 1; // Final temperature (implicit kbT with kb=1)
     double Tstep = 0.001; // Temperature step (implicit kbT with kb=1)
 
+    vector< pair<double, double> > T_Cv;
     double Cv = 0;
 
     string const Cv_file("Cv.dat");
@@ -71,12 +72,27 @@ int main()
                 Cv += gE[i].first * gE[i].first * gE[i].second * exp(-gE[i].first / T) / (T * T);
             }
 
+            T_Cv.push_back(pair<double, double>(T, Cv));
             Cv_stream << T << " " << Cv << endl;
 
         } // end of for(int T = Tinit; T < Tfinal; T += Tstep)
 
-        Cv_stream.close();
+        /* Computation of the maximum of Cv */
+        int max = T_Cv[0].second;
+        int index_max = 0;
+        for (int i = 1; i < T_Cv.size(); i++)
+        {
+            if (T_Cv[i].second > max)
+            {
+                max = T_Cv[i].second;
+                index_max = i;
+            }
+        }
 
+        Cv_stream << "# The maximum of Cv occurs at the temperature Tc = " << T_Cv[index_max].first << endl;
+
+        Cv_stream.close();
+    
     } // end of if(Cv_stream)
     else
     {
