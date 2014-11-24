@@ -148,11 +148,11 @@ int main()
         /* ==================== Writing output ==================== */
         /* ======================================================== */
         
-        gE_stream << "#E_bin_min g(E)" << endl;
+        gE_stream << "#E_bin_mean g(E)" << endl;
         
         for(int i = 0; i < number_bins; i++)
         {
-            gE_stream << E_min + i * deltaE << " " << entropy[i] << endl;
+            gE_stream << E_min + (2 * i + 1) * deltaE / 2 << " " << entropy[i] << endl; //computation of the mean energy of each bin
         }
         
         gE_stream.close();
