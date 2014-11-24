@@ -23,7 +23,7 @@ int main()
     /* Exchange constants */
     double J0 = 1;
     double J1 = 1;
-    double J2 = -1;
+    double J2 = -0.5;
     
     /* Wang-Landau parameters */
     double lnf = 1;
@@ -46,7 +46,7 @@ int main()
     double random_range = 100000000; // float precision (1e8)
     
     /* Energy bins */
-    double E_max = 525; // E_max = number of spins * maximum value taken by (4 * J0 + 2 * J1 + 2 * J2). This is an upper boundary.
+    double E_max = 525; // E_max < number of spins * maximum value taken by (4 * J0 + 2 * J1 + 2 * J2). This is an upper boundary.
     double E_min = - 725;
     int const number_bins = 50; // We cut the energy interval in number_bins bins
     double deltaE = (E_max - E_min) / number_bins;
@@ -150,11 +150,25 @@ int main()
         
         gE_stream << "#E_bin_mean g(E)" << endl;
         gE_stream << "#number of lines of data in this file :" << endl;
-        gE_stream << number_bins << endl;
-        
-        for(int i = 0; i < number_bins; i++)
+// anciens trucs        gE_stream << number_bins << endl;
+
+        int number_bin_positive_energy = 0; // we keep only positive values of E
+        for (int i = 0; i < number_bins; i++) // we keep only positive values of E
         {
-            gE_stream << E_min + (2 * i + 1) * deltaE / 2 << " " << entropy[i] << endl; //computation of the mean energy of each bin
+            if ((E_min + (2 * i + 1) * deltaE / 2) > 0) // we keep only positive values of E
+            {
+                number_bin_positive_energy = i; // we keep only positive values of E
+                break; // we keep only positive values of E
+            }
+        }
+        gE_stream << (number_bins - number_bin_positive_energy) << endl; // we keep only positive values of E
+
+// anciens trucs        for (int i = 0; i < number_bins; i++)
+        for (int i = number_bin_positive_energy; i < number_bins; i++) // we keep only positive values of E
+        {
+            gE_stream << (E_min + (2 * i + 1) * deltaE / 2) / (nx * ny * nz * (4 * abs(J0) + 2 * abs(J1) + 2 * abs(J2))) << " " << entropy[i] << endl; //computation of the mean energy of each bin
+            /* In order to have energies smaller than 1 (so that the exponential in the calculation of Cv does not become too big, 
+            we rescale by dividing by the maximum possible energy (nx * ny * nz * (4 * abs(J0) + 2 * abs(J1) + 2 * abs(J2))) */
         }
         
         gE_stream.close();
