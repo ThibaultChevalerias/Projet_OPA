@@ -165,6 +165,6 @@ int main()
     }
 
     system("PAUSE");
-    return O;
+    return 0;
 
 }
