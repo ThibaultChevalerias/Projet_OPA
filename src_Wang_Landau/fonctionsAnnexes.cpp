@@ -38,17 +38,24 @@ int getMax(vector<int>& table) // It only works for integer tables
 
 int getMin(vector<int>& table) // It only works for integer tables
 {
-    double min = table[0];
-
-    for(int i = 1; i < table.size(); i++)
+    double min = 0;
+    int index = 0;
+    while (table[index] == 0)
     {
-        if(min > table[i])
+        index ++;
+    }
+
+    min = table[index];
+
+    for(int i = index + 1; i < table.size(); i++)
+    {
+        if(min > table[i] && table[i] != 0)
         {
             min = table[i];
         }
     }
-    return min;
 
+    return min;
 }
 
 double getMean(vector<int>& table) // /!\ eliminates the 0 values in the table from the computation
@@ -80,13 +87,24 @@ double getMean(vector<int>& table) // /!\ eliminates the 0 values in the table f
 bool isFlat(double flatness_limit, vector<int>& visits) // It only works for integer tables
 {
     double mean = 0;
-    double range = 0;
+    double min = 0;
+    double max = 0;
+    double deviation = 0;
 
     mean = getMean(visits);
+    min = getMin(visits);
+    max = getMax(visits);
 
-    range = getMax(visits) - getMin(visits);
-
-    if(1-(range/mean) > flatness_limit)
+    if ((max - mean) > (mean - min))
+    {
+        deviation = max - mean;
+    }
+    else
+    {
+        deviation = mean - min;
+    }
+    
+    if(1 - (deviation/mean) > flatness_limit)
     {
         return true;
     }

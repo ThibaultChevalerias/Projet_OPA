@@ -32,7 +32,7 @@ int main()
     double flatness_limit = 0.5; // When we reach this limit, we consider the histogram as flat, and change the value of f.
     
     int step = 0;
-    int step_max = 100000; // Maximum number of steps allowed for the flatness to pass above flatness_limit
+    int step_max = 1000000; // Maximum number of steps allowed for the flatness to pass above flatness_limit
     
     /* Variables to choose a random spin */
     int xChosen = 0;
@@ -46,9 +46,9 @@ int main()
     double random_range = 100000000; // float precision (1e8)
     
     /* Energy bins */
-    double E_max = 1000; // E_max = number of spins * maximum value taken by (4 * J0 + 2 * J1 + 2 * J2). This is an upper boundary.
-    double E_min = - E_max;
-    int const number_bins = 100; // We cut the energy interval in 100 bins
+    double E_max = 525; // E_max = number of spins * maximum value taken by (4 * J0 + 2 * J1 + 2 * J2). This is an upper boundary.
+    double E_min = - 725;
+    int const number_bins = 50; // We cut the energy interval in number_bins bins
     double deltaE = (E_max - E_min) / number_bins;
     
     double currentEnergy = 0;
@@ -156,7 +156,7 @@ int main()
         }
         
         gE_stream.close();
-    
+        system("PAUSE");
     }//end if(gE_stream)
     else
     {
