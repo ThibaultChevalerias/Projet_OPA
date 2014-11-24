@@ -149,6 +149,8 @@ int main()
         /* ======================================================== */
         
         gE_stream << "#E_bin_mean g(E)" << endl;
+        gE_stream << "#number of lines of data in this file :" << endl;
+        gE_stream << number_bins << endl;
         
         for(int i = 0; i < number_bins; i++)
         {
