@@ -49,11 +49,11 @@ int main()
     /* =================== Computation of Cv ==================== */
     /* ========================================================== */
 
-    int Tinit = 1; //Initial temperature (implicit kbT with kb=1)
-    int Tfinal = 100; // Final temperature (implicit kbT with kb=1)
-    int Tstep = 1; // Temperature step (implicit kbT with kb=1)
+    double Tinit = 0.001; //Initial temperature (implicit kbT with kb=1)
+    double Tfinal = 1; // Final temperature (implicit kbT with kb=1)
+    double Tstep = 0.001; // Temperature step (implicit kbT with kb=1)
 
-    int Cv = 0;
+    double Cv = 0;
 
     string const Cv_file("Cv.dat");
     ofstream Cv_stream(Cv_file.c_str());
@@ -62,15 +62,13 @@ int main()
     {
         Cv_stream << "#T Cv" << endl;
 
-        for(int T = Tinit; T < Tfinal; T += Tstep)
+        for(double T = Tinit; T <= Tfinal; T += Tstep)
         {
-            Cv = 0; // reinitialisation of the value of Cv for each temperature
+            Cv = 0;
 
             for(int i = 0; i < gE.size(); i++)
             {
-
-                Cv += gE[i].first * gE[i].first * gE[i].second * exp(- gE[i].first / T) / (T * T);
-
+                Cv += gE[i].first * gE[i].first * gE[i].second * exp(-gE[i].first / T) / (T * T);
             }
 
             Cv_stream << T << " " << Cv << endl;
