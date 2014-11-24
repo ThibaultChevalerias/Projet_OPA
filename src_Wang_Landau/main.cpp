@@ -156,11 +156,13 @@ int main()
         }
         
         gE_stream.close();
-        system("PAUSE");
     }//end if(gE_stream)
     else
     {
         cout << "error while opening g(E).dat" << endl;
     }
+
+    system("PAUSE");
+    return O;
 
 }
