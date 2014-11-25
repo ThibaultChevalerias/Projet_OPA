@@ -16,6 +16,7 @@ int main()
     /* ==================== Declaration of variables ==================== */
     /* ================================================================== */
     
+    /* Size of the spin box */
     int nx = 5;
     int ny = 5;
     int nz = 5;
@@ -32,7 +33,7 @@ int main()
     double flatness_limit = 0.5; // When we reach this limit, we consider the histogram as flat, and change the value of f.
     
     int step = 0;
-    int step_max = 1000000; // Maximum number of steps allowed for the flatness to pass above flatness_limit
+    int step_max = 1000000; // Maximum number of steps allowed for the flatness to get above flatness_limit
     
     /* Variables to choose a random spin */
     int xChosen = 0;
@@ -49,7 +50,7 @@ int main()
     double E_max = 525; // E_max < number of spins * maximum value taken by (4 * J0 + 2 * J1 + 2 * J2). This is an upper boundary.
     double E_min = - 725;
     int const number_bins = 50; // We cut the energy interval in number_bins bins
-    double deltaE = (E_max - E_min) / number_bins;
+    double deltaE = (E_max - E_min) / number_bins; // Energy range of each bin
     
     double currentEnergy = 0;
     double proposedEnergy = 0;
@@ -85,6 +86,9 @@ int main()
         
         cout << "Wait while the simulation is running..." << endl;
         
+        currentEnergy = System.getEnergy(J0, J1, J2); // initialisation of the (computation of the) energy
+        currentBin = locateBin(E_min, deltaE, currentEnergy); // idem for the current bin
+
         while(lnf > epsilon)
         {
             cout << "lnf = " << lnf << endl;
@@ -93,9 +97,6 @@ int main()
             
             while(step < (step_max / sqrt(lnf)))
             {
-                currentEnergy = System.getEnergy(J0, J1, J2);
-                currentBin = locateBin(E_min, deltaE, currentEnergy);
-
                 /* We propose a new state */
                 xChosen = rand() % nx;
                 yChosen = rand() % ny;
@@ -109,8 +110,9 @@ int main()
                 random_double = random_int / random_range;
                 if(log(random_double) < (entropy[currentBin] - entropy[proposedBin]))
                 {
-                    // if accepted, update the energy and the system:
+                    // if accepted, update the energy, current bin,  and the system:
                     currentEnergy = proposedEnergy;
+                    currentBin = proposedBin;
                     System.switchValue(xChosen, yChosen, zChosen);
                     visits[proposedBin] ++;
                     entropy[proposedBin] += lnf;
@@ -133,7 +135,7 @@ int main()
                     }
                 } 
             
-            } // end while(flatness < flatness_limit && step < step_max)
+            } // end while(step < step_max)
             
             for(int i = 0; i < number_bins; i++)
             {

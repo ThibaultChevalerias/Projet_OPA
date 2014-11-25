@@ -13,9 +13,9 @@ int main()
     /* ================ Reading g(E) from file ================ */
     /* ======================================================== */
 
-    vector< pair<double, double> > gE;
+    vector< pair<double, double> > gE; // Will contain the energy (mean energy of a bin) and the value of g(E) for this energy
 
-    string const read_file("g(E).dat"); // may be modified 
+    string const read_file("g(E).dat"); // path may be modified to read the appropriate file. This file is the output file of the Wang-landau algorithm code 
     ifstream read_stream(read_file.c_str());
     if(read_stream)
     {
