@@ -49,12 +49,17 @@ int main()
     /* =================== Computation of Cv ==================== */
     /* ========================================================== */
 
-    double Tinit = 0.001; //Initial temperature (implicit kbT with kb=1)
-    double Tfinal = 1; // Final temperature (implicit kbT with kb=1)
-    double Tstep = 0.001; // Temperature step (implicit kbT with kb=1)
+    /** TEMPERATURES À MIEUX EXPLICITER **/
+    double Tinit = 1; //Initial temperature (implicit kbT with kb=1)
+    double Tfinal = 100; // Final temperature (implicit kbT with kb=1)
+    double Tstep = 1; // Temperature step (implicit kbT with kb=1)
 
     vector< pair<double, double> > T_Cv; // Will contain the value of the temperature T and the corresponding value of the specific heat Cv
-    double Cv = 0;
+    double Cv = 0; // heat capacity
+    double Z = 0; // partition function
+    double mean_energy = 0;
+    double mean_square_energy = 0;
+    double gEfE = 0; // represents g(E)f(E) = exp(ln(g(E)) - beta * E)
 
     string const Cv_file("Cv.dat"); // output file. Will allow to plot Cv in function of T, with gnuplot for instance
     ofstream Cv_stream(Cv_file.c_str()); // output stream
@@ -66,12 +71,26 @@ int main()
         for(double T = Tinit; T <= Tfinal; T += Tstep)
         {
             Cv = 0;
+            Z = 0;
+            mean_energy = 0;
+            mean_square_energy = 0;
 
             for(int i = 0; i < gE.size(); i++)
             {
-                Cv += gE[i].first * gE[i].first * gE[i].second * exp(-gE[i].first / T) / (T * T); // Computation of Cv as the derivative against T of the internal Energy U, with U = intergral(g(E) * exp (-E/kbT) * E * dE)
+                gEfE = exp(gE[i].second - gE[i].first / T); // represents g(E)f(E) = exp(ln(g(E)) - beta * E)
+                Z += gEfE;
+                mean_energy += gEfE * gE[i].first;
+                mean_square_energy += gEfE * gE[i].first * gE[i].first;
             }
-
+            
+            mean_energy /= Z; // normalization by the partition function
+            mean_square_energy /= Z; // normalization by the partition function
+            
+            /** Computation of Cv : 
+            Cv = (1/k_B*T^2) * (<E^2> - <E>^2)
+            **/
+            Cv = (mean_square_energy - mean_energy * mean_energy) / (T * T); // The k_B is omitted (arbitrary values)
+            
             T_Cv.push_back(pair<double, double>(T, Cv));
             Cv_stream << T << " " << Cv << endl;
 
