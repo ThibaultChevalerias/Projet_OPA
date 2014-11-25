@@ -5,6 +5,9 @@
 
 using namespace std;
 
+// The object Tensor makes more easy the storage and use of the spins on the 3D periodic lattice.
+// In particular, the spins are stored in the Tensor object in a 1D array, but Tensor allows the user to call a 3D array with the coordinates x, y and z of the selected spin, which is more userfriendly.
+
 Tensor::Tensor() : nx(10), ny(10), nz(10)
 {
     
@@ -17,7 +20,7 @@ Tensor::Tensor(int n1, int n2, int n3) : nx(n1), ny(n2), nz(n3)
 
 void Tensor::init() // Random initialization
 {
-    /* Génération aléatoire de l'état inital : +1 pour un spin up, -1 pour un spin down*/
+    /* Random generation of the initial state : +1 for a spin up, -1 for a spin down */
 
     spins.clear(); // We remove all previous elements
 
@@ -40,7 +43,7 @@ void Tensor::init() // Random initialization
     }
 }
 
-double Tensor::getEnergy(double J0, double J1, double J2)
+double Tensor::getEnergy(double J0, double J1, double J2) // Computes and returns the energy of the system
 {
     double E = 0;
 
@@ -63,17 +66,17 @@ double Tensor::getEnergy(double J0, double J1, double J2)
     return E;
 }
 
-int Tensor::getValue(int x,int y,int z)
+int Tensor::getValue(int x,int y,int z) // return the value of the spin at the spatial coordinates x, y and z
 {
     return spins[x + nx * y + nx * ny * z];
 }
 
-double Tensor::getDeltaE(int x, int y, int z, double J0, double J1, double J2)
+double Tensor::getDeltaE(int x, int y, int z, double J0, double J1, double J2) // Computes and returns the energy variation of the system when a spin is switch (from up to down or down to up)
 {
-    /* Calcul du DeltaE engendré
-    Il y a un *2 car Einitiale = -Efinale, donc DeltaE = 2 * Efinale
-    Il y a un autre *2 car il faut compter l'interaction de i avec j, puis de j avec i (on compte 2 fois chaque interaction)
-    Donc au total il y a un *4 */
+    /* Computation of the generated DeltaE
+    There is a *2 because Einitial = -Efinal, thus DeltaE = 2 * Efinal
+    There is an other *2 because it is requiered to count the interaction of i with j, then of j with i (one counts 2 times each interaction)
+    Thus in total there is a *4 in the formula */
 
     return 4 * spins[x + nx * y + nx * ny * z] *
         (J0 * (spins[mod(x + 1, nx) + nx * y + nx * ny * z] + spins[mod(x - 1, nx) + nx * y + nx * ny * z]
@@ -82,7 +85,7 @@ double Tensor::getDeltaE(int x, int y, int z, double J0, double J1, double J2)
         + J2 * (spins[x + nx * y + nx * ny * mod(z + 2, nz)] + spins[x + nx * y + nx * ny * mod(z - 2, nz)]));
 }
 
-int Tensor::getMagnetization()
+int Tensor::getMagnetization() // Computes and returns the total magnetization of the system
 {
     int magnetization = 0;
 
@@ -100,7 +103,7 @@ int Tensor::getMagnetization()
     return magnetization;
 }
 
-int Tensor::getMagnetizationPlane(int z)
+int Tensor::getMagnetizationPlane(int z) // Computes and returns the value of the magnetisation of a plane of the system
 {
     /* Used in our energy minimization study */
     
@@ -117,7 +120,7 @@ int Tensor::getMagnetizationPlane(int z)
     return magnetizationPlane;
 }
 
-int Tensor::getSumMagnetizationPlanes()
+int Tensor::getSumMagnetizationPlanes() // Computes and returns the sum of the absolute values of the magnetizations of each plane of the system
 {
     /* We use the sum of the plane's magnetizations as a criterium in the energy minimization study */
 
@@ -141,7 +144,7 @@ int Tensor::getSumMagnetizationPlanes()
     return magnetization;
 }
 
-int Tensor::getAFMCriterium()
+int Tensor::getAFMCriterium() // The AFM criterium consists in computing a sum where, when looking at a given spin, if the neighbouring spins (z axis) are antiparallel (AFM), then we count +1, and if they are parallel (FM) we count -1
 {
     /* We use this criterium in the energy minimization study */
     

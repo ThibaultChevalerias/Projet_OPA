@@ -22,9 +22,9 @@ int main()
     int nz = 5;
     
     /* Exchange constants */
-    double J0 = 1;
-    double J1 = 1;
-    double J2 = -0.5;
+    double J0 = 1; // plane (x,y) ferromagnetic here
+    double J1 = 1; // nearest neighbours following the z axis (ferro here)
+    double J2 = -0.5; // next nearest neighbours following the z axis (may be ferro or antiferro)
     
     /* Wang-Landau parameters */
     double lnf = 1;
@@ -48,16 +48,16 @@ int main()
     
     /* Energy bins */
     double E_max = 525; // E_max < number of spins * maximum value taken by (4 * J0 + 2 * J1 + 2 * J2). This is an upper boundary.
-    double E_min = - 725;
+    double E_min = - 725; // E_max et E_min à modifier !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     int const number_bins = 50; // We cut the energy interval in number_bins bins
     double deltaE = (E_max - E_min) / number_bins; // Energy range of each bin
     
-    double currentEnergy = 0;
-    double proposedEnergy = 0;
+    double currentEnergy = 0; // energy of the current state of the system
+    double proposedEnergy = 0; // energy of the system after inversion of a selected spin
     
     /* Histogram and entropy for the Wang-Landau algorithm */
-    vector<int> visits (number_bins,0); // Histogram of visits of each bin, initialized with zeros
-    vector<double> entropy(number_bins,0); // Entropy for each energy, initialized with zeros
+    vector<int> visits (number_bins,0); // Histogram of visits of each energy bin, initialized with zeros
+    vector<double> entropy(number_bins,0); // Entropy for each energy bin, initialized with zeros
     
     int currentBin = 0; // in order to know in which bin our current energy is
     int proposedBin = 0; // idem for the proposed energy

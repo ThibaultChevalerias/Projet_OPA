@@ -16,7 +16,7 @@ int main()
     vector< pair<double, double> > gE; // Will contain the energy (mean energy of a bin) and the value of g(E) for this energy
 
     string const read_file("g(E).dat"); // path may be modified to read the appropriate file. This file is the output file of the Wang-landau algorithm code 
-    ifstream read_stream(read_file.c_str());
+    ifstream read_stream(read_file.c_str()); // reading stream
     if(read_stream)
     {
         string line; // to jump the first and second lines
@@ -24,7 +24,7 @@ int main()
         getline(read_stream, line); // to jump the second line
 
         int number_lines = 0;
-        read_stream >> number_lines; // read the first important line : the number of data lines
+        read_stream >> number_lines; // read the first important line of the file : the number of data lines
 
         double energy_temp = 0;
         double gE_temp = 0;
@@ -53,11 +53,11 @@ int main()
     double Tfinal = 1; // Final temperature (implicit kbT with kb=1)
     double Tstep = 0.001; // Temperature step (implicit kbT with kb=1)
 
-    vector< pair<double, double> > T_Cv;
+    vector< pair<double, double> > T_Cv; // Will contain the value of the temperature T and the corresponding value of the specific heat Cv
     double Cv = 0;
 
-    string const Cv_file("Cv.dat");
-    ofstream Cv_stream(Cv_file.c_str());
+    string const Cv_file("Cv.dat"); // output file. Will allow to plot Cv in function of T, with gnuplot for instance
+    ofstream Cv_stream(Cv_file.c_str()); // output stream
 
     if(Cv_stream)
     {
@@ -69,7 +69,7 @@ int main()
 
             for(int i = 0; i < gE.size(); i++)
             {
-                Cv += gE[i].first * gE[i].first * gE[i].second * exp(-gE[i].first / T) / (T * T);
+                Cv += gE[i].first * gE[i].first * gE[i].second * exp(-gE[i].first / T) / (T * T); // Computation of Cv as the derivative against T of the internal Energy U, with U = intergral(g(E) * exp (-E/kbT) * E * dE)
             }
 
             T_Cv.push_back(pair<double, double>(T, Cv));
@@ -77,7 +77,7 @@ int main()
 
         } // end of for(int T = Tinit; T < Tfinal; T += Tstep)
 
-        /* Computation of the maximum of Cv */
+        /* Computation of the maximum of Cv and determination of the transition temperature Tc */
         int max = T_Cv[0].second;
         int index_max = 0;
         for (int i = 1; i < T_Cv.size(); i++)
