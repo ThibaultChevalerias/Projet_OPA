@@ -70,15 +70,15 @@ int main()
     
     /* Declaration of streams (data output) */
     
-    string const gE_file("g(E).dat");
+    string const lngE_file("lng(E).dat");
     
-    ofstream gE_stream(gE_file.c_str());
+    ofstream lngE_stream(lngE_file.c_str());
     
     /* Initialization of rand */
     
     srand(time(NULL));
     
-    if(gE_stream)
+    if(lngE_stream)
     {
         /* =============================================================== */
         /* ==================== Wang-Landau algorithm ==================== */
@@ -150,8 +150,8 @@ int main()
         /* ==================== Writing output ==================== */
         /* ======================================================== */
         
-        gE_stream << "#E_bin_mean g(E)" << endl;
-        gE_stream << "#number of lines of data in this file :" << endl;
+        lngE_stream << "#E_bin_mean ln(g(E))" << endl;
+        lngE_stream << "#number of lines of data in this file :" << endl;
 // anciens trucs        gE_stream << number_bins << endl;
 
         int number_bin_positive_energy = 0; // we keep only positive values of E
