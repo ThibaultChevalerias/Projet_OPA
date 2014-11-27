@@ -52,6 +52,13 @@ int main()
     int const number_bins = 50; // We cut the energy interval in number_bins bins
     double deltaE = (E_max - E_min) / number_bins; // Energy range of each bin
     
+    /* Translation of the zero of energy in order to have positive energies */
+    if(E_min < 0)
+    {
+        E_max -= E_min; // we add - E_min
+        E_min = 0; // we add - E_min : E_min - E_min = 0
+    }
+    
     double currentEnergy = 0; // energy of the current state of the system
     double proposedEnergy = 0; // energy of the system after inversion of a selected spin
     
@@ -152,25 +159,12 @@ int main()
         
         gE_stream << "#E_bin_mean g(E)" << endl;
         gE_stream << "#number of lines of data in this file :" << endl;
-// anciens trucs        gE_stream << number_bins << endl;
+        gE_stream << number_bins << endl;
 
-        int number_bin_positive_energy = 0; // we keep only positive values of E
-        for (int i = 0; i < number_bins; i++) // we keep only positive values of E
+        for (int i = 0; i < number_bins; i++)
         {
-            if ((E_min + (2 * i + 1) * deltaE / 2) > 0) // we keep only positive values of E
-            {
-                number_bin_positive_energy = i; // we keep only positive values of E
-                break; // we keep only positive values of E
-            }
-        }
-        gE_stream << (number_bins - number_bin_positive_energy) << endl; // we keep only positive values of E
-
-// anciens trucs        for (int i = 0; i < number_bins; i++)
-        for (int i = number_bin_positive_energy; i < number_bins; i++) // we keep only positive values of E
-        {
-            gE_stream << (E_min + (2 * i + 1) * deltaE / 2) / (nx * ny * nz * (4 * abs(J0) + 2 * abs(J1) + 2 * abs(J2))) << " " << entropy[i] << endl; //computation of the mean energy of each bin
-            /* In order to have energies smaller than 1 (so that the exponential in the calculation of Cv does not become too big, 
-            we rescale by dividing by the maximum possible energy (nx * ny * nz * (4 * abs(J0) + 2 * abs(J1) + 2 * abs(J2))) */
+            gE_stream << (E_min + (2 * i + 1) * deltaE / 2) / (nx * ny * nz) << " " << entropy[i] << endl; //computation of the mean energy of each bin
+            // We divide by nx * ny * nz, in order to have the energy per site
         }
         
         gE_stream.close();
