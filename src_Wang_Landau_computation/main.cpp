@@ -10,12 +10,12 @@ using namespace std;
 int main()
 {
     /* ======================================================== */
-    /* ================ Reading g(E) from file ================ */
+    /* ============== Reading ln(g(E)) from file ============== */
     /* ======================================================== */
 
-    vector< pair<double, double> > gE; // Will contain the energy (mean energy of a bin) and the value of g(E) for this energy
+    vector< pair<double, double> > lngE; // Will contain the energy (mean energy of a bin) and the value of lng(E) for this energy
 
-    string const read_file("g(E).dat"); // path may be modified to read the appropriate file. This file is the output file of the Wang-landau algorithm code 
+    string const read_file("lng(E).dat"); // path may be modified to read the appropriate file. This file is the output file of the Wang-landau algorithm code 
     ifstream read_stream(read_file.c_str()); // reading stream
     if(read_stream)
     {
@@ -27,13 +27,13 @@ int main()
         read_stream >> number_lines; // read the first important line of the file : the number of data lines
 
         double energy_temp = 0;
-        double gE_temp = 0;
+        double lngE_temp = 0;
 
         for(int i = 0; i < number_lines; i ++) //read from the fourth to the last line
         {
             read_stream >> energy_temp;
-            read_stream >> gE_temp;
-            gE.push_back(pair<double, double>(energy_temp, gE_temp));
+            read_stream >> lngE_temp;
+            lngE.push_back(pair<double, double>(energy_temp, lngE_temp));
         }
 
         read_stream.close();
@@ -41,7 +41,7 @@ int main()
     } // end of if(read_stream)
     else
     {
-        cout << "Error while reading g(E) file !!!" << endl;
+        cout << "Error while reading lng(E) file !!!" << endl;
     }
 
 
@@ -75,12 +75,12 @@ int main()
             mean_energy = 0;
             mean_square_energy = 0;
 
-            for(int i = 0; i < gE.size(); i++)
+            for(int i = 0; i < lngE.size(); i++)
             {
-                gEfE = exp(gE[i].second - gE[i].first / T); // represents g(E)f(E) = exp(ln(g(E)) - beta * E)
+                gEfE = exp(lngE[i].second - lngE[i].first / T); // represents g(E)f(E) = exp(ln(g(E)) - beta * E)
                 Z += gEfE;
-                mean_energy += gEfE * gE[i].first;
-                mean_square_energy += gEfE * gE[i].first * gE[i].first;
+                mean_energy += gEfE * lngE[i].first;
+                mean_square_energy += gEfE * lngE[i].first * lngE[i].first;
             }
             
             mean_energy /= Z; // normalization by the partition function

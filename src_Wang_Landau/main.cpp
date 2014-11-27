@@ -163,15 +163,15 @@ int main()
 
         for (int i = 0; i < number_bins; i++)
         {
-            gE_stream << (E_min + (2 * i + 1) * deltaE / 2) / (nx * ny * nz) << " " << entropy[i] << endl; //computation of the mean energy of each bin
+            lngE_stream << (E_min + (2 * i + 1) * deltaE / 2) / (nx * ny * nz) << " " << entropy[i] << endl; //computation of the mean energy of each bin
             // We divide by nx * ny * nz, in order to have the energy per site
         }
         
-        gE_stream.close();
-    }//end if(gE_stream)
+        lngE_stream.close();
+    }//end if(lngE_stream)
     else
     {
-        cout << "error while opening g(E).dat" << endl;
+        cout << "error while opening lng(E).dat" << endl;
     }
 
     system("PAUSE");
