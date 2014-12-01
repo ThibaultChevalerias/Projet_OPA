@@ -47,16 +47,19 @@ int main()
     double random_range = 100000000; // float precision (1e8)
     
     /* Energy bins */
-    double E_max = 525; // E_max < number of spins * maximum value taken by (4 * J0 + 2 * J1 + 2 * J2). This is an upper boundary.
-    double E_min = - 725; // E_max et E_min à modifier !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    double E_max = 550; // E_max < number of spins * maximum value taken by (4 * J0 + 2 * J1 + 2 * J2). This is an upper boundary.
+    double E_min = - 750; // E_max et E_min à modifier !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     int const number_bins = 50; // We cut the energy interval in number_bins bins
     double deltaE = (E_max - E_min) / number_bins; // Energy range of each bin
-    
+    double rescale = abs(E_min) + deltaE;
+
     /* Translation of the zero of energy in order to have positive energies */
     if(E_min < 0)
     {
-        E_max -= E_min; // we add - E_min
-        E_min = 0; // we add - E_min : E_min - E_min = 0
+        E_max += rescale; // we add abs(E_min) + deltaE
+        E_min += rescale; // we add abs(E_min) + deltaE
+        /* This rescale is in order to have strictly (non-zero) positive energies, 
+        because negative and zero energies triggers the divergence of Cv in Wang_Landau_computation program */
     }
     
     double currentEnergy = 0; // energy of the current state of the system
@@ -93,7 +96,8 @@ int main()
         
         cout << "Wait while the simulation is running..." << endl;
         
-        currentEnergy = System.getEnergy(J0, J1, J2); // initialisation of the (computation of the) energy
+        currentEnergy = System.getEnergy(J0, J1, J2) + rescale; // initialisation of the (computation of the) energy
+        // For the rescale, see declaration of variables, we have translated the zero of energy
         currentBin = locateBin(E_min, deltaE, currentEnergy); // idem for the current bin
 
         while(lnf > epsilon)
@@ -109,7 +113,7 @@ int main()
                 yChosen = rand() % ny;
                 zChosen = rand() % nz;
                 
-                proposedEnergy = currentEnergy + System.getDeltaE(xChosen, yChosen, zChosen, J0, J1, J2);
+                proposedEnergy = currentEnergy + System.getDeltaE(xChosen, yChosen, zChosen, J0, J1, J2); // no need to rescale again by "-E_min_initial", "currentEnergy" has already been rescaled
                 proposedBin = locateBin(E_min, deltaE, proposedEnergy);
                 
                 /* Acceptance of the new state */
@@ -118,7 +122,7 @@ int main()
                 if(log(random_double) < (entropy[currentBin] - entropy[proposedBin]))
                 {
                     // if accepted, update the energy, current bin,  and the system:
-                    currentEnergy = proposedEnergy;
+                    currentEnergy = proposedEnergy; // no need to rescale again by "-E_min_initial", "currentEnergy" has already been rescaled
                     currentBin = proposedBin;
                     System.switchValue(xChosen, yChosen, zChosen);
                     visits[proposedBin] ++;
@@ -157,10 +161,14 @@ int main()
         /* ==================== Writing output ==================== */
         /* ======================================================== */
         
-        lngE_stream << "#E_bin_mean ln(g(E))" << endl;
         lngE_stream << "#number of lines of data in this file :" << endl;
         lngE_stream << number_bins << endl;
-
+        
+        lngE_stream << "#Number of sites : " << endl;
+        lngE_stream << nx * ny * nz << endl;
+        
+        lngE_stream << "#E_bin_mean ln(g(E))" << endl;
+        
         for (int i = 0; i < number_bins; i++)
         {
             lngE_stream << (E_min + (2 * i + 1) * deltaE / 2) / (nx * ny * nz) << " " << entropy[i] << endl; //computation of the mean energy of each bin

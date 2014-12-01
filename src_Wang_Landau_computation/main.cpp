@@ -17,23 +17,41 @@ int main()
 
     string const read_file("lng(E).dat"); // path may be modified to read the appropriate file. This file is the output file of the Wang-landau algorithm code 
     ifstream read_stream(read_file.c_str()); // reading stream
+    
+    int nxnynz = 0; // cannot be declared in the next "if" because it is used later
+    // nxnynz = nx * ny * nz (number of sites)
+    double lngE_max = 0; // cannot be declared in the next "if" because it is used later
+    // Maximum value of ln(g(E))
+    
     if(read_stream)
     {
-        string line; // to jump the first and second lines
-        getline(read_stream, line); // to jump the first line
-        getline(read_stream, line); // to jump the second line
-
+        string line; // to jump the comment lines
+        
+        getline(read_stream, line); // to jump the first line (comment)
         int number_lines = 0;
         read_stream >> number_lines; // read the first important line of the file : the number of data lines
-
+        
+        getline(read_stream, line); // to jump the comment lines
+        getline(read_stream, line); // to jump the comment lines
+        read_stream >> nxnynz; // nxnynz = nx * ny * nz (number of sites)
+        
+        getline(read_stream, line); // to jump the comment lines
+        getline(read_stream, line); // to jump the comment lines
+        
         double energy_temp = 0;
         double lngE_temp = 0;
-
+        
         for(int i = 0; i < number_lines; i ++) //read from the fourth to the last line
         {
             read_stream >> energy_temp;
             read_stream >> lngE_temp;
             lngE.push_back(pair<double, double>(energy_temp, lngE_temp));
+            
+            /* Calculation of the maximum : */
+            if(lngE_temp > lngE_max)
+            {
+                lngE_max = lngE_temp;
+            }
         }
 
         read_stream.close();
@@ -50,9 +68,9 @@ int main()
     /* ========================================================== */
 
     /** TEMPERATURES À MIEUX EXPLICITER **/
-    double Tinit = 1; //Initial temperature (implicit kbT with kb=1)
-    double Tfinal = 100; // Final temperature (implicit kbT with kb=1)
-    double Tstep = 1; // Temperature step (implicit kbT with kb=1)
+    double Tinit = 0.01; //Initial temperature (implicit kbT with kb=1)
+    double Tfinal = 1; // Final temperature (implicit kbT with kb=1)
+    double Tstep = 0.01; // Temperature step (implicit kbT with kb=1)
 
     vector< pair<double, double> > T_Cv; // Will contain the value of the temperature T and the corresponding value of the specific heat Cv
     double Cv = 0; // heat capacity
@@ -77,7 +95,9 @@ int main()
 
             for(int i = 0; i < lngE.size(); i++)
             {
-                gEfE = exp(lngE[i].second - lngE[i].first / T); // represents g(E)f(E) = exp(ln(g(E)) - beta * E)
+                gEfE = exp(lngE[i].second - lngE_max - lngE[i].first / T); // represents g(E)f(E) = exp(ln(g(E)) - ln(g(E))_max - beta * E)
+                /* the "- ln(g(E))_max" is to avoid big numbers in the exponential. It does not change anything in the computation of Cv because
+                it is cancelled out by dividing by Z later */
                 Z += gEfE;
                 mean_energy += gEfE * lngE[i].first;
                 mean_square_energy += gEfE * lngE[i].first * lngE[i].first;
@@ -91,13 +111,18 @@ int main()
             **/
             Cv = (mean_square_energy - mean_energy * mean_energy) / (T * T); // The k_B is omitted (arbitrary values)
             
+            Cv *= nxnynz; // We had the energy per site, so the Cv is per site^2 (because there are quadratic terms of the energy in it).
+            // So we multiply it by the number of sites.
+            
             T_Cv.push_back(pair<double, double>(T, Cv));
             Cv_stream << T << " " << Cv << endl;
 
         } // end of for(int T = Tinit; T < Tfinal; T += Tstep)
-
-        /* Computation of the maximum of Cv and determination of the transition temperature Tc */
-        int max = T_Cv[0].second;
+        
+        /* ============================================================================================== */
+        /* ==== Computation of the maximum of Cv and determination of the transition temperature Tc ===== */
+        /* ============================================================================================== */
+        double max = T_Cv[0].second;
         int index_max = 0;
         for (int i = 1; i < T_Cv.size(); i++)
         {
