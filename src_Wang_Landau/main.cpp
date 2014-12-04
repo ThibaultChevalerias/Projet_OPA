@@ -24,16 +24,16 @@ int main()
     /* Exchange constants */
     double J0 = 1; // plane (x,y) ferromagnetic here
     double J1 = 1; // nearest neighbours following the z axis (ferro here)
-    double J2 = -0.5; // next nearest neighbours following the z axis (may be ferro or antiferro)
+    double J2 = - 0.8; // next nearest neighbours following the z axis (may be ferro or antiferro)
     
     /* Wang-Landau parameters */
     double lnf = 1;
-    double epsilon = 1.0/8; // à modifier ?????
+    double epsilon = 1.0/64; // à modifier ?????
     
-    double flatness_limit = 0.5; // When we reach this limit, we consider the histogram as flat, and change the value of f.
+    double flatness_limit = 0.9; // When we reach this limit, we consider the histogram as flat, and change the value of f.
     
     int step = 0;
-    int step_max = 1000000; // Maximum number of steps allowed for the flatness to get above flatness_limit
+    int step_max = 10000000; // Maximum number of steps allowed for the flatness to get above flatness_limit
     
     /* Variables to choose a random spin */
     int xChosen = 0;
@@ -49,7 +49,7 @@ int main()
     /* Energy bins */
     double E_max = 550; // E_max < number of spins * maximum value taken by (4 * J0 + 2 * J1 + 2 * J2). This is an upper boundary.
     double E_min = - 750; // E_max et E_min à modifier !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    int const number_bins = 50; // We cut the energy interval in number_bins bins
+    int const number_bins = 200; // We cut the energy interval in number_bins bins
     double deltaE = (E_max - E_min) / number_bins; // Energy range of each bin
     double rescale = abs(E_min) + deltaE;
 
@@ -100,7 +100,7 @@ int main()
         // For the rescale, see declaration of variables, we have translated the zero of energy
         currentBin = locateBin(E_min, deltaE, currentEnergy); // idem for the current bin
 
-        while(lnf > epsilon)
+        while(lnf >= epsilon)
         {
             cout << "lnf = " << lnf << endl;
 

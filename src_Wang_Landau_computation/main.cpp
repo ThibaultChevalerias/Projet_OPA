@@ -68,9 +68,9 @@ int main()
     /* ========================================================== */
 
     /** TEMPERATURES À MIEUX EXPLICITER **/
-    double Tinit = 0.01; //Initial temperature (implicit kbT with kb=1)
-    double Tfinal = 1; // Final temperature (implicit kbT with kb=1)
-    double Tstep = 0.01; // Temperature step (implicit kbT with kb=1)
+    double Tinit = 0.005; //Initial temperature (implicit kbT with kb=1)
+    double Tfinal = 0.02; // Final temperature (implicit kbT with kb=1)
+    double Tstep = 0.0001; // Temperature step (implicit kbT with kb=1)
 
     vector< pair<double, double> > T_Cv; // Will contain the value of the temperature T and the corresponding value of the specific heat Cv
     double Cv = 0; // heat capacity
