@@ -125,7 +125,17 @@ int Tensor::getSumMagnetizationPlanes()
 
     for(int k = 0; k < nz; k++)
     {
-        magnetization += abs(spins.getMagnetizationPlane(k)); //Pour voir le caractère FM de chaque plan
+        int magnetizationPlane = 0;
+
+        for (int i = 0; i < nx; i++)
+        {
+            for (int j = 0; j < ny; j++)
+            {
+                magnetizationPlane += spins[i + nx * j + nx * ny * k];
+            }
+        }
+
+        magnetization += magnetizationPlane; //Pour voir le caractère FM de chaque plan
     }
 
     return magnetization;
