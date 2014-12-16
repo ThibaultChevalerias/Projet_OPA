@@ -110,9 +110,9 @@ int main()
                 
                 for(int x = 0; x < nx; x++)
                 {
-                    for(int y = 0; y < nx; y++)
+                    for(int y = 0; y < ny; y++)
                     {
-                        for(int z = 0; z < nx; z++)
+                        for(int z = 0; z < nz; z++)
                         {
                             proposedEnergy = currentEnergy + System.getDeltaE(x, y, z, J0, J1, J2); // no need to rescale again by "-E_min_initial", "currentEnergy" has already been rescaled
                             proposedBin = locateBin(E_min, deltaE, proposedEnergy);

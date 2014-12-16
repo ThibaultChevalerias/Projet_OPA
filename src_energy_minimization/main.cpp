@@ -80,7 +80,7 @@ int main()
     double estimated_time_minutes = (J2init - J2final) * (Tinit - Tinf) * sweep_max/(1000000 * 100 * temperatureStep * J2step);
     cout << "Estimated time : " << estimated_time_minutes << " minutes, or " << estimated_time_minutes / 60 << " hours" << endl;
 
-    for(double J2 = J2init; J2 > J2final; J2 -= J2step)
+    for(double J2 = J2init; J2 >= J2final; J2 -= J2step)
     {
         counterT = 0; // see far below where this counter is used
         string label = "_J2=" + to_string(J2);
@@ -146,7 +146,7 @@ int main()
             /* Algorithme Monte Carlo */
 
             /* REMARQUE : FONCTION SEPAREE A FAIRE, CLAIREMENT ! */
-            for(T = Tinit; T > Tinf; T -= temperatureStep)
+            for(T = Tinit; T >= Tinf; T -= temperatureStep)
             {
                 cout << "J2 : " << J2 << "; T : " << T << endl;
                 counterT ++;
@@ -188,7 +188,7 @@ int main()
                     {
                         for(y = 0; y < ny; y++)
                         {
-                            for(z = 0; y < nz ; z++)
+                            for(z = 0; z < nz ; z++)
                             {
                                 /* Calcul du DeltaE engendré */
                                 DeltaE = States.getDeltaE(x, y, z, J0, J1, J2);
@@ -291,10 +291,8 @@ int main()
                 magnetization_stream.close();
             }
 
-            plot_stream << "set ylabel 'Cv'" << endl 
-                << "plot 'data/Cv" + label + ".dat'" << endl 
-                << "set ylabel 'chi'" << endl 
-                << "plot 'data/chi" + label + ".dat'" << endl << "pause -1" << endl
+            plot_stream << "set ylabel 'Cv, chi'" << endl 
+                << "plot 'data/Cv" + label + ".dat', 'data/chi" + label + ".dat'" << endl << "pause -1" << endl 
                 << "set ylabel 'spin position along z'" << endl << "set zlabel 'magnetization of the plane at height z'" << endl
                 << "splot [" << Tinf << ":" << Tinit << "] [0:" << nz - 1 << "] [0:" << nx*ny << "] 'data/configuration" + label + ".dat' with lines"
                 << endl << "pause -1" << endl;
