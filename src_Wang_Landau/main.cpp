@@ -17,9 +17,9 @@ int main()
     /* ================================================================== */
     
     /* Size of the spin box */
-    int nx = 5;
-    int ny = 5;
-    int nz = 5;
+    int nx = 4;
+    int ny = 4;
+    int nz = 8;
     
     /* Exchange constants */
     double J0 = 1; // plane (x,y) ferromagnetic here
@@ -32,13 +32,8 @@ int main()
     
     double flatness_limit = 0.9; // When we reach this limit, we consider the histogram as flat, and change the value of f.
     
-    int step = 0;
-    int step_max = 10000000; // Maximum number of steps allowed for the flatness to get above flatness_limit
-    
-    /* Variables to choose a random spin */
-    int xChosen = 0;
-    int yChosen = 0;
-    int zChosen = 0;
+    int sweep = 0;
+    int sweep_max = 100000; // Maximum number of steps allowed for the flatness to get above flatness_limit
     
     /* Variables randomly generated */
     int random_int = 0;
@@ -47,9 +42,9 @@ int main()
     double random_range = 100000000; // float precision (1e8)
     
     /* Energy bins */
-    double E_max = 550; // E_max < number of spins * maximum value taken by (4 * J0 + 2 * J1 + 2 * J2). This is an upper boundary.
-    double E_min = - 750; // E_max et E_min à modifier !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    int const number_bins = 200; // We cut the energy interval in number_bins bins
+    double E_max = 400; // E_max < number of spins * maximum value taken by (4 * J0 + 2 * J1 + 2 * J2). This is an upper boundary.
+    double E_min = - 400; // E_max et E_min à modifier !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    int const number_bins = 400; // We cut the energy interval in number_bins bins
     double deltaE = (E_max - E_min) / number_bins; // Energy range of each bin
     double rescale = abs(E_min) + deltaE;
 
@@ -104,41 +99,47 @@ int main()
         {
             cout << "lnf = " << lnf << endl;
 
-            step = 0;
+            sweep = 0;
             
-            while(step < (step_max / sqrt(lnf)))
+            while(sweep < (sweep_max / sqrt(lnf)))
             {
                 /* We propose a new state */
-                xChosen = rand() % nx;
-                yChosen = rand() % ny;
-                zChosen = rand() % nz;
                 
-                proposedEnergy = currentEnergy + System.getDeltaE(xChosen, yChosen, zChosen, J0, J1, J2); // no need to rescale again by "-E_min_initial", "currentEnergy" has already been rescaled
-                proposedBin = locateBin(E_min, deltaE, proposedEnergy);
-                
-                /* Acceptance of the new state */
-                random_int = (rand() % random_range_int + 1); // /!\ the algebraic operations with rand() have to be performed with integers.
-                random_double = random_int / random_range;
-                if(log(random_double) < (entropy[currentBin] - entropy[proposedBin]))
+                for(int xChosen = 0; xChosen < nx; xChosen++)
                 {
-                    // if accepted, update the energy, current bin,  and the system:
-                    currentEnergy = proposedEnergy; // no need to rescale again by "-E_min_initial", "currentEnergy" has already been rescaled
-                    currentBin = proposedBin;
-                    System.switchValue(xChosen, yChosen, zChosen);
-                    visits[proposedBin] ++;
-                    entropy[proposedBin] += lnf;
-                }
-                else
-                {
-                    visits[currentBin] ++;
-                    entropy[currentBin] += lnf;
-                }
+                    for(int yChosen = 0; yChosen < nx; yChosen++)
+                    {
+                        for(int zChosen = 0; zChosen < nx; zChosen++)
+                        {
+                            proposedEnergy = currentEnergy + System.getDeltaE(xChosen, yChosen, zChosen, J0, J1, J2); // no need to rescale again by "-E_min_initial", "currentEnergy" has already been rescaled
+                            proposedBin = locateBin(E_min, deltaE, proposedEnergy);
                 
-                step++;
+                            /* Acceptance of the new state */
+                            random_int = (rand() % random_range_int + 1); // /!\ the algebraic operations with rand() have to be performed with integers.
+                            random_double = random_int / random_range;
+                            if(log(random_double) < (entropy[currentBin] - entropy[proposedBin]))
+                            {
+                                // if accepted, update the energy, current bin,  and the system:
+                                currentEnergy = proposedEnergy; // no need to rescale again by "-E_min_initial", "currentEnergy" has already been rescaled
+                                currentBin = proposedBin;
+                                System.switchValue(xChosen, yChosen, zChosen);
+                                visits[proposedBin] ++;
+                                entropy[proposedBin] += lnf;
+                            }
+                            else
+                            {
+                                visits[currentBin] ++;
+                                entropy[currentBin] += lnf;
+                            }
+                        }//end for zChosen
+                    }//end for yChosen
+                }//end for xChosen
+                
+                sweep++;
 
-                if(step % 10000 == 0) // A modifier ??????????????????????????????????
+                if(sweep % 100 == 0) // A modifier ??????????????????????????????????
                 {
-                    cout << step << endl;
+                    cout << sweep << endl;
                     if(isFlat(flatness_limit, visits))
                     {
                         cout << "The histogram is flat enough" << endl;
