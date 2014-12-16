@@ -33,7 +33,10 @@ int main()
     double flatness_limit = 0.9; // When we reach this limit, we consider the histogram as flat, and change the value of f.
     
     int sweep = 0;
-    int sweep_max = 100000; // Maximum number of steps allowed for the flatness to get above flatness_limit
+    int sweep_max = 1000000; // Maximum number of steps allowed for the flatness to get above flatness_limit
+    int x = 0;
+    int y = 0;
+    int z = 0;
     
     /* Variables randomly generated */
     int random_int = 0;
@@ -42,8 +45,8 @@ int main()
     double random_range = 100000000; // float precision (1e8)
     
     /* Energy bins */
-    double E_max = 400; // E_max < number of spins * maximum value taken by (4 * J0 + 2 * J1 + 2 * J2). This is an upper boundary.
-    double E_min = - 400; // E_max et E_min à modifier !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    double E_max = 450; // E_max < number of spins * maximum value taken by (4 * J0 + 2 * J1 + 2 * J2). This is an upper boundary.
+    double E_min = - 450; // E_max et E_min à modifier !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     int const number_bins = 400; // We cut the energy interval in number_bins bins
     double deltaE = (E_max - E_min) / number_bins; // Energy range of each bin
     double rescale = abs(E_min) + deltaE;
@@ -105,13 +108,13 @@ int main()
             {
                 /* We propose a new state */
                 
-                for(int xChosen = 0; xChosen < nx; xChosen++)
+                for(int x = 0; x < nx; x++)
                 {
-                    for(int yChosen = 0; yChosen < nx; yChosen++)
+                    for(int y = 0; y < nx; y++)
                     {
-                        for(int zChosen = 0; zChosen < nx; zChosen++)
+                        for(int z = 0; z < nx; z++)
                         {
-                            proposedEnergy = currentEnergy + System.getDeltaE(xChosen, yChosen, zChosen, J0, J1, J2); // no need to rescale again by "-E_min_initial", "currentEnergy" has already been rescaled
+                            proposedEnergy = currentEnergy + System.getDeltaE(x, y, z, J0, J1, J2); // no need to rescale again by "-E_min_initial", "currentEnergy" has already been rescaled
                             proposedBin = locateBin(E_min, deltaE, proposedEnergy);
                 
                             /* Acceptance of the new state */
@@ -122,7 +125,7 @@ int main()
                                 // if accepted, update the energy, current bin,  and the system:
                                 currentEnergy = proposedEnergy; // no need to rescale again by "-E_min_initial", "currentEnergy" has already been rescaled
                                 currentBin = proposedBin;
-                                System.switchValue(xChosen, yChosen, zChosen);
+                                System.switchValue(x, y, z);
                                 visits[proposedBin] ++;
                                 entropy[proposedBin] += lnf;
                             }
@@ -131,9 +134,9 @@ int main()
                                 visits[currentBin] ++;
                                 entropy[currentBin] += lnf;
                             }
-                        }//end for zChosen
-                    }//end for yChosen
-                }//end for xChosen
+                        }//end for z
+                    }//end for y
+                }//end for x
                 
                 sweep++;
 
