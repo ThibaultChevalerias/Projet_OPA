@@ -33,10 +33,13 @@ int main()
     double J2init = - 0.1; // constante d'échange entre seconds voisins
     double J2final = - 1;
     double J2step = 0.1;
-    int nombrePas = 10000; // Nombre de pas de simulation
-    int xChosen = 0; //Voir section Monte Carlo
-    int yChosen = 0; //Voir section Monte Carlo
-    int zChosen = 0; //Voir section Monte Carlo
+    
+    int sweep = 0;
+    int sweep_max = 10000; // Nombre de sweep de simulation
+    int x = 0;
+    int y = 0;
+    int z = 0;
+    
     double nombreEntre0Et1 = 0;
     double floattemp = 0;
     double temperatureStep = 0.1;
@@ -74,7 +77,7 @@ int main()
     
 
     /* NOUVELLE SECTION : BOUCLE SUR J2/J1 */
-    double estimated_time_minutes = (J2init - J2final) * (Tinit - Tinf) * nombrePas/(1000000 * 100 * temperatureStep * J2step);
+    double estimated_time_minutes = (J2init - J2final) * (Tinit - Tinf) * sweep_max/(1000000 * 100 * temperatureStep * J2step);
     cout << "Estimated time : " << estimated_time_minutes << " minutes, or " << estimated_time_minutes / 60 << " hours" << endl;
 
     for(double J2 = J2init; J2 > J2final; J2 -= J2step)
@@ -125,7 +128,7 @@ int main()
         if(streams)
         {
             /* Entêtes */
-            plot_stream << "#Parameters : J0 = J1 = " << J1 << "; J2 = " << J2 << "; number of steps = " << nombrePas << endl;
+            plot_stream << "#Parameters : J0 = J1 = " << J1 << "; J2 = " << J2 << "; number of sweeps = " << sweep_max << endl;
             Cv_stream << "#Temperature Cv" << endl;
             chi_stream << "#Temperature chi" << endl;
             configuration_stream << "#T z sumMagnetization" << endl;
@@ -174,136 +177,96 @@ int main()
                     configuration[i] = 0;
                     sum_configuration[i] = 0;
                 }
-
-                for(int pas = 0; pas < nombrePas; pas++)
-                {
-                    /* Algorithme en lui-même */
-
-                    xChosen = rand() % nx;
-                    yChosen = rand() % ny;
-                    zChosen = rand() % nz;
-
-                    /* Calcul du DeltaE engendré */
-                    DeltaE = States.getDeltaE(xChosen, yChosen, zChosen, J0, J1, J2);
-
-                    /* DeltaM */
-                    DeltaM = - 2 * States.getValue(xChosen, yChosen, zChosen); // Change of +2 or -2 in magnetization
-
-                    if (FM_AFM_choice == 1) //AFM
+                
+                /********************************************/
+                /********** Algorithme en lui-même **********/
+                /********************************************/
+                
+                for(sweep = 0; sweep < sweep_max; sweep++)
+                {                    
+                    for(x = 0; x < nx; x++)
                     {
-                        /* DeltaSumMagnetizationPlanes */
-                        DeltaSumMagnetizationPlanes = abs(States.getMagnetizationPlane(zChosen) - 2 * States.getValue(xChosen, yChosen, zChosen))
-                            - abs(States.getMagnetizationPlane(zChosen));
-
-                        /* For DeltaAFMcriterium, only the zChosen + 1 and zChosen - 1 spins are affected because the spins around zChosen are the same*/
-                        DeltaAFMcriterium = 2 * States.getValue(xChosen, yChosen, zChosen) * (States.getValue(xChosen, yChosen, mod(zChosen + 2, nz))
-                            + States.getValue(xChosen, yChosen, mod(zChosen - 2, nz)));
-                    }
-                    
-                    /* Decision taken */
-
-                    if(DeltaE <= 0) // Si l'énergie finale est plus faible
-                    {
-                        States.switchValue(xChosen, yChosen, zChosen); // On multiplie par -1 : on change l'état
-                    }
-                    else // Si l'énergie finale est plus élevée
-                    {
-                        floattemp = rand() % 100000000 + 1; // float precision 1e8
-                        nombreEntre0Et1 = floattemp / 100000000;
-                        if(log(nombreEntre0Et1) < - DeltaE/T)
+                        for(y = 0; y < ny; y++)
                         {
-                            States.switchValue(xChosen, yChosen, zChosen); // On multiplie par -1 : on change l'état
-                        }
-                        else
-                        {
-                            DeltaE = 0; // So that the computation of E leaves it unchanged.
-                            DeltaM = 0; // idem for the calculation of M
-                            DeltaSumMagnetizationPlanes = 0;
-                            DeltaAFMcriterium = 0;                            
-                        }
-                    }
+                            for(z = 0; y < nz ; z++)
+                            {
+                                /* Calcul du DeltaE engendré */
+                                DeltaE = States.getDeltaE(x, y, z, J0, J1, J2);
+                                
+                                /* Decision taken */
 
-                    if(pas == nombrePas/2)
+                                if(DeltaE <= 0) // Si l'énergie finale est plus faible
+                                {
+                                    States.switchValue(x, y, z); // On multiplie par -1 : on change l'état
+                                }
+                                else // Si l'énergie finale est plus élevée
+                                {
+                                    floattemp = rand() % 100000000 + 1; // float precision 1e8
+                                    nombreEntre0Et1 = floattemp / 100000000;
+                                    if(log(nombreEntre0Et1) < - DeltaE/T)
+                                    {
+                                        States.switchValue(x, y, z); // On multiplie par -1 : on change l'état
+                                    } // else nothing happens
+                                }
+                            } //end for z
+                        } // end for y
+                    } // end for x
+                        
+                    if(sweep >= sweep_max/2) // We keep the final half of the states to compute the averaged variables
                     {
                         E = States.getEnergy(J0, J1, J2);
-                        sum_E = E;
-                        sum_E_square = E * E;
-
-                        M = States.getMagnetization();
-                        sum_M = M;
-                        sum_M_square = M * M;
-
-                        if (FM_AFM_choice == 1) //AFM
-                        {
-                            sumMagnetizationPlanes = States.getSumMagnetizationPlanes();
-                            sum_sumMagnetizationPlanes = sumMagnetizationPlanes;
-
-                            AFMcriterium = States.getAFMCriterium();
-                            sum_AFMcriterium = AFMcriterium;
-                        }
-
-                        for(int i = 0; i < nz; i++)
-                        {
-                            configuration[i] = States.getMagnetizationPlane(i);
-                            sum_configuration[i] = configuration[i];
-                        }
-                    }
-
-                    if(pas > nombrePas/2) // We keep the final half of the states to compute the averaged variables
-                    {
-                        E += DeltaE;
                         sum_E += E;
                         sum_E_square += E * E;
 
-                        M += DeltaM;
+                        M = States.getMagnetization();
                         sum_M += M;
                         sum_M_square += M * M;
 
                         if (FM_AFM_choice == 1) //AFM
                         {
-                            sumMagnetizationPlanes += DeltaSumMagnetizationPlanes;
+                            sumMagnetizationPlanes = States.getSumMagnetizationPlanes();
                             sum_sumMagnetizationPlanes += sumMagnetizationPlanes;
 
-                            AFMcriterium += DeltaAFMcriterium;
+                            AFMcriterium = States.getAFMCriterium();
                             sum_AFMcriterium += AFMcriterium;
                         }
 
-                        configuration[zChosen] += DeltaM;
                         for(int i = 0; i < nz; i++)
                         {
+                            configuration[i] = States.getMagnetizationPlane(i);
                             sum_configuration[i] += configuration[i];
                         }
-                        
                     }
-                }//end for nombrePas
+
+                }//end for sweep_max
 
                 /* Writing results */
 
                 /* Cv = (1/kT^2) * (<E^2> - <E>^2) */
-                Cv = (2/(nombrePas*T*T)) * (sum_E_square - sum_E * sum_E * 2 / nombrePas);
+                Cv = (2/(sweep_max*T*T)) * (sum_E_square - sum_E * sum_E * 2 / sweep_max);
 
                 /* chi = (1/kT) * (<M^2> - <M>^2) */
-                chi = (2/(nombrePas*T)) * (sum_M_square - sum_M * sum_M * 2 / nombrePas);
+                chi = (2/(sweep_max*T)) * (sum_M_square - sum_M * sum_M * 2 / sweep_max);
 
                 Cv_stream << T << " " << Cv << endl;
                 chi_stream << T << " " << chi << endl;
 
                 if(FM_AFM_choice == 1) //AFM
                 {
-                    sumMagnetizationPlanes_stream << T << " " << 2 * sum_sumMagnetizationPlanes / nombrePas << endl;
-                    AFMcriterium_stream << T << " " << 2 * sum_AFMcriterium / nombrePas << endl;
+                    sumMagnetizationPlanes_stream << T << " " << 2 * sum_sumMagnetizationPlanes / sweep_max << endl;
+                    AFMcriterium_stream << T << " " << 2 * sum_AFMcriterium / sweep_max << endl;
                 }
                 else //FM (we assume FM_AFM_choice ==2)
                 {
-                    magnetization_stream << T << " " << abs(2 * sum_M / nombrePas) << endl;
+                    magnetization_stream << T << " " << abs(2 * sum_M / sweep_max) << endl;
                 }
 
                 /* We only plot for a few values of T so that the graph is not too ugly */
-                if(counterT % 5 == 0)
+                if(counterT % 2 == 0)
                 {
                     for(int i = 0; i < nz; i++)
                     {
-                        configuration_stream << T << " " << i << " " << abs(2 * sum_configuration[i] / nombrePas) << endl;
+                        configuration_stream << T << " " << i << " " << abs(2 * sum_configuration[i] / sweep_max) << endl;
                     }
                     configuration_stream << endl;
                 }
