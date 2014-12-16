@@ -23,17 +23,17 @@ int main()
     cout << "Wait while the simulation is running..." << endl;
 
     /* Déclaration des variables */
-    int nx = 12;
-    int ny = 12;
-    int nz = 12;
+    int nx = 4;
+    int ny = 4;
+    int nz = 8;
 
     double T = 1; //Temperature
     double J0 = 1;
     double J1 = 1; // constante d'échange entre plus proches voisins
-    double J2init = - 0.3; // constante d'échange entre seconds voisinsq
-    double J2final = - 0.5;
-    double J2step = 1;
-    int nombrePas = 200000; // Nombre de pas de simulation
+    double J2init = - 0.1; // constante d'échange entre seconds voisins
+    double J2final = - 1;
+    double J2step = 0.1;
+    int nombrePas = 10000; // Nombre de pas de simulation
     int xChosen = 0; //Voir section Monte Carlo
     int yChosen = 0; //Voir section Monte Carlo
     int zChosen = 0; //Voir section Monte Carlo
@@ -208,8 +208,8 @@ int main()
                     }
                     else // Si l'énergie finale est plus élevée
                     {
-                        floattemp = rand() % 1000 + 1; // CHANGER LA PRECISION ???
-                        nombreEntre0Et1 = floattemp / 1000;
+                        floattemp = rand() % 100000000 + 1; // float precision 1e8
+                        nombreEntre0Et1 = floattemp / 100000000;
                         if(log(nombreEntre0Et1) < - DeltaE/T)
                         {
                             States.switchValue(xChosen, yChosen, zChosen); // On multiplie par -1 : on change l'état
@@ -303,7 +303,7 @@ int main()
                 {
                     for(int i = 0; i < nz; i++)
                     {
-                        configuration_stream << T << " " << i << " " << 2 * sum_configuration[i] / nombrePas << endl;
+                        configuration_stream << T << " " << i << " " << abs(2 * sum_configuration[i] / nombrePas) << endl;
                     }
                     configuration_stream << endl;
                 }
@@ -312,20 +312,28 @@ int main()
 
             if(FM_AFM_choice == 1) //AFM
             {
-                plot_stream << "plot 'data/sumMagnetizationPlanes" + label + ".dat', 'data/AFMcriterium" + label + ".dat'" << endl << "pause -1" << endl;
+                plot_stream << "set xlabel 'Temperature'" << endl << "set ylabel 'sum of the Magnetization of the Planes'" << endl 
+                    << "plot 'data/sumMagnetizationPlanes" + label + ".dat'" << endl 
+                    << "set ylabel 'AFM criterium'" << endl 
+                    << "plot 'data/AFMcriterium" + label + ".dat'" << endl << "pause -1" << endl;
 
                 sumMagnetizationPlanes_stream.close();
                 AFMcriterium_stream.close();
             }
-            else //FM (we assume FM_AFM_choice ==2)
+            else //FM (we assume FM_AFM_choice == 2)
             {
-                plot_stream << "plot 'data/magnetization" + label + ".dat'" << endl << "pause -1" << endl;
+                plot_stream << "set ylabel 'Total Magnetization'" << endl 
+                    << "plot 'data/magnetization" + label + ".dat'" << endl << "pause -1" << endl;
 
                 magnetization_stream.close();
             }
 
-            plot_stream << "plot 'data/Cv" + label + ".dat', 'data/chi" + label + ".dat'" << endl << "pause -1" << endl
-                << "splot [0:" << nz - 1 << "] [-" << nz*nz << ":" << nz*nz << "] 'data/configuration" + label + ".dat' with lines"
+            plot_stream << "set ylabel 'Cv'" << endl 
+                << "plot 'data/Cv" + label + ".dat'" << endl 
+                << "set ylabel 'chi'" << endl 
+                << "plot 'data/chi" + label + ".dat'" << endl << "pause -1" << endl
+                << "set ylabel 'spin position along z'" << endl << "set zlabel 'magnetization of the plane at height z'" << endl
+                << "splot [" << Tinf << ":" << Tinit << "] [0:" << nz - 1 << "] [0:" << nx*ny << "] 'data/configuration" + label + ".dat' with lines"
                 << endl << "pause -1" << endl;
 
             Cv_stream.close();
