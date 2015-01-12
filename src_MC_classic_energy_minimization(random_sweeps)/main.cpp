@@ -33,7 +33,7 @@ int main()
     double J1 = 1; // constante d'échange entre plus proches voisins
     double J2init = - 0.1; // constante d'échange entre seconds voisins
     double J2final = - 1;
-    double J2step = 0.2;
+    double J2step = 0.1;
     
     int nombrePas = 1000000; // Number of Monte-Carlo steps
     int x = 0;
@@ -42,8 +42,8 @@ int main()
     
     double nombreEntre0Et1 = 0;
     double floattemp = 0;
-    double temperatureStep = 0.05 * 1000;
-    double Tinit = 15.5;
+    double temperatureStep = 0.05/* * 1000*/;
+    double Tinit = 3;
     double Tinf = 0.1;
     int counterT = 0; // see far below where this counter is used
 
@@ -116,15 +116,19 @@ int main()
         {
             /* We select the useful streams (the streams have to be declared outside the 'if') */
             magnetization_stream.close();
+            energy_stream.close();
+            configuration_stream.close();
 
-            streams = sumMagnetizationPlanes_stream && AFMcriterium_stream && Cv_stream && chi_stream && energy_stream && plot_stream && configuration_stream;
+            streams = sumMagnetizationPlanes_stream && AFMcriterium_stream && Cv_stream && chi_stream && plot_stream;
         }
         else if(FM_AFM_choice == 2)
         {
             sumMagnetizationPlanes_stream.close();
             AFMcriterium_stream.close();
+            energy_stream.close();
+            configuration_stream.close();
 
-            streams = magnetization_stream && Cv_stream && chi_stream && energy_stream && plot_stream && configuration_stream;
+            streams = magnetization_stream && Cv_stream && chi_stream && plot_stream;
         }
         else if(FM_AFM_choice == 3)
         {
@@ -156,8 +160,6 @@ int main()
                 plot_stream << "#Parameters : J0 = J1 = " << J1 << "; J2 = " << J2 << "; number of steps = " << nombrePas << endl;
                 Cv_stream << "#Temperature Cv" << endl;
                 chi_stream << "#Temperature chi" << endl;
-                configuration_stream << "#T z sumMagnetization" << endl;
-                energy_stream << "#Temperature Energy" << endl;
             }
             
             if(FM_AFM_choice == 1) //AFM
@@ -169,6 +171,11 @@ int main()
             {
                 magnetization_stream << "#Temperature magnetization" << endl;
             }
+            else if(FM_AFM_choice == 3)
+            {
+                configuration_stream << "#T z sumMagnetization" << endl;
+                energy_stream << "#Temperature Energy" << endl;
+            }
 
             /* Algorithme Monte Carlo */
 
@@ -178,13 +185,16 @@ int main()
                 // What we had not done earlier for FM_AFM_choice == 4:
                 string const convergence_file = "results/convergence" + label + "_T=" + to_string(T) + ".dat";
                 ofstream convergence_stream(convergence_file.c_str());
-                convergence_stream << "#Steps Energy" << endl;
                 
                 if(FM_AFM_choice != 4)
                 {
                     convergence_stream.close();
                 }
-                
+                else
+                {
+                    convergence_stream << "#Steps Energy" << endl;
+                }
+
                 cout << "J2 : " << J2 << "; T : " << T << endl;
                 counterT ++;
 
@@ -228,7 +238,10 @@ int main()
 
                     /* Calcul du DeltaE engendré */
                     DeltaE = States.getDeltaE(x, y, z, J0, J1, J2);
-                                
+                            
+                    /* Calcul du DeltaM engendré */
+                    DeltaM = - 2 * States.getValue(x,y,z);
+
                     /* Decision taken */
 
                     if(DeltaE <= 0) // Si l'énergie finale est plus faible
@@ -242,21 +255,37 @@ int main()
                         if(log(nombreEntre0Et1) < - DeltaE/T)
                         {
                             States.switchValue(x, y, z); // On multiplie par -1 : on change l'état
-                        } // else nothing happens
+                        } 
+                        else // nothing happens
+                        {
+                            DeltaE = 0;
+                            DeltaM = 0;
+                        }
                     }
 
-                    if(FM_AFM_choice == 4 && step%100==0)
+                    if(FM_AFM_choice == 4 && step % 100 == 0)
                     {
                         convergence_stream << step << " " << States.getEnergy(J0, J1, J2) << endl;
                     }
                     
-                    if(step >= nombrePas/2 && FM_AFM_choice != 4) // We keep the final half of the states to compute the averaged variables
+                    if(step == nombrePas/2 && FM_AFM_choice != 4)
                     {
                         E = States.getEnergy(J0, J1, J2);
+                        sum_E = E;
+                        sum_E_square = E * E;
+
+                        M = States.getMagnetization();
+                        sum_M = M;
+                        sum_M_square = M * M;
+                    }
+
+                    if(step > nombrePas/2 && FM_AFM_choice != 4) // We keep the final half of the states to compute the averaged variables
+                    {
+                        E += DeltaE;
                         sum_E += E;
                         sum_E_square += E * E;
 
-                        M = States.getMagnetization();
+                        M += DeltaM;
                         sum_M += M;
                         sum_M_square += M * M;
 
@@ -289,7 +318,6 @@ int main()
 
                     Cv_stream << T << " " << Cv << endl;
                     chi_stream << T << " " << chi << endl;
-                    energy_stream << T << " " << sum_E * 2 / nombrePas << endl;
                 }
                 if(FM_AFM_choice == 1) //AFM
                 {
@@ -299,6 +327,10 @@ int main()
                 else if(FM_AFM_choice == 2)
                 {
                     magnetization_stream << T << " " << abs(2 * sum_M / nombrePas) << endl;
+                }
+                else if(FM_AFM_choice == 3)
+                {
+                    energy_stream << T << " " << sum_E * 2 / nombrePas << endl;
                 }
 
                 /* We only plot for a few values of T so that the graph is not too ugly */
@@ -330,20 +362,24 @@ int main()
 
                 magnetization_stream.close();
             }
+            else if(FM_AFM_choice == 3)
+            {
+                plot_stream  << "set ylabel 'energy'" << endl
+                    << "plot 'data/energy" + label + ".dat'" << endl << "pause -1" << endl;
+    //                << "set ylabel 'spin position along z'" << endl << "set zlabel 'magnetization of the plane at height z'" << endl
+    //                << "splot [" << Tinf << ":" << Tinit << "] [0:" << nz - 1 << "] [0:" << nx*ny << "] 'data/configuration" + label + ".dat' with lines"
+                energy_stream.close();
+                configuration_stream.close();
+            }
             
             if(FM_AFM_choice != 4)
             {
                 plot_stream << "set ylabel 'Cv, chi'" << endl 
                     << "plot 'data/Cv" + label + ".dat', 'data/chi" + label + ".dat'" << endl << "pause -1" << endl 
-                    << "set ylabel 'energy'" << endl
-                    << "plot 'data/energy" + label + ".dat'" 
-    //                << "set ylabel 'spin position along z'" << endl << "set zlabel 'magnetization of the plane at height z'" << endl
-    //                << "splot [" << Tinf << ":" << Tinit << "] [0:" << nz - 1 << "] [0:" << nx*ny << "] 'data/configuration" + label + ".dat' with lines"
                     << endl << "pause -1" << endl;
 
                 Cv_stream.close();
                 chi_stream.close();
-                configuration_stream.close();
                 plot_stream.close();
             }
 //            system("start C:\\Users\\Thibault\\Desktop\\Projet_OPA\\gnuplot\\bin\\gnuplot.exe");
