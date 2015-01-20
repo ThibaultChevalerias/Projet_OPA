@@ -34,6 +34,7 @@ int main()
     
     int step = 0;
     int step_max = 20000000; // Maximum number of steps allowed for the flatness to get above flatness_limit
+    int missed_steps = 0; //see algorithm
     
     /* Variables to choose a random spin */
     int x = 0;
@@ -76,11 +77,11 @@ int main()
     
     Tensor System(nx, ny, nz);
     
-    System.init();
+    System.read_config(8); // We have chosen T=8 for now
     
     /* Declaration of streams (data output) */
     
-    string const lngE_file("lng(E).dat");
+    string const lngE_file("results/lng(E).dat");
     
     ofstream lngE_stream(lngE_file.c_str());
     
@@ -105,6 +106,7 @@ int main()
             cout << "lnf = " << lnf << endl;
 
             step = 0;
+            missed_steps = 0;
             
             while(step < (step_max / sqrt(lnf)))
             {
@@ -114,24 +116,32 @@ int main()
                 z = rand() % nz;
                 
                 proposedEnergy = currentEnergy + System.getDeltaE(x, y, z, J0, J1, J2); // no need to rescale again by "-E_min_initial", "currentEnergy" has already been rescaled
-                proposedBin = locateBin(E_min, deltaE, proposedEnergy);
                 
-                /* Acceptance of the new state */
-                random_int = (rand() % random_range_int + 1); // /!\ the algebraic operations with rand() have to be performed with integers.
-                random_double = random_int / random_range;
-                if(log(random_double) < (entropy[currentBin] - entropy[proposedBin]))
+                if(proposedEnergy >= E_min && proposedEnergy <= E_max) // if we stay in the right energy range
                 {
-                    // if accepted, update the energy, current bin,  and the system:
-                    currentEnergy = proposedEnergy; // no need to rescale again by "-E_min_initial", "currentEnergy" has already been rescaled
-                    currentBin = proposedBin;
-                    System.switchValue(x, y, z);
-                    visits[proposedBin] ++;
-                    entropy[proposedBin] += lnf;
+                    proposedBin = locateBin(E_min, deltaE, proposedEnergy);
+                    
+                    /* Acceptance of the new state */
+                    random_int = (rand() % random_range_int + 1); // /!\ the algebraic operations with rand() have to be performed with integers.
+                    random_double = random_int / random_range;
+                    if(log(random_double) < (entropy[currentBin] - entropy[proposedBin]))
+                    {
+                        // if accepted, update the energy, current bin,  and the system:
+                        currentEnergy = proposedEnergy; // no need to rescale again by "-E_min_initial", "currentEnergy" has already been rescaled
+                        currentBin = proposedBin;
+                        System.switchValue(x, y, z);
+                        visits[proposedBin] ++;
+                        entropy[proposedBin] += lnf;
+                    }
+                    else
+                    {
+                        visits[currentBin] ++;
+                        entropy[currentBin] += lnf;
+                    }
                 }
-                else
+                else // if we leave the right energy range
                 {
-                    visits[currentBin] ++;
-                    entropy[currentBin] += lnf;
+                    missed_steps ++; // nothing happens and we count the number of missed steps
                 }
                 
                 step++;
@@ -139,6 +149,7 @@ int main()
                 if(step % 100000 == 0) // A modifier ??????????????????????????????????
                 {
                     cout << step << endl;
+                    cout << "missed steps: " << missed_steps << endl;
                     if(isFlat(flatness_limit, visits))
                     {
                         cout << "The histogram is flat enough" << endl;
