@@ -19,7 +19,6 @@ int main()
     int ny = 12;
     int nz = 12;
 
-    double T = 1; // Temperature
     double J0 = 1;
     double J1 = 1; // nearest neighbour interaction constant
     double J2 = 0; // next-nearest neighbour interaction constant
@@ -31,9 +30,9 @@ int main()
     
     double nombreEntre0Et1 = 0;
     double floattemp = 0;
-    double temperatureStep = 0.1;
-    double Tinit = 100;
-    double Tinf = 0.1;
+    double temperatureStep = 0.05;
+    double Tinit = 12;
+    double Tinf = 4;
 
     /* Variables for output*/
     /* Energy */
@@ -83,7 +82,7 @@ int main()
 
         /* Monte-Carlo temperature loop */
 
-        for(T = Tinit; T >= Tinf; T -= temperatureStep)
+        for(double T = Tinit; T >= Tinf; T -= temperatureStep)
         {
             cout << "T: " << T << endl;
 
@@ -157,6 +156,9 @@ int main()
             /* sigmaE^2 = (<E^2> - <E>^2) */
             sigmaE = ((sum_E_square - sum_E * sum_E * 2 / nombrePas) * 2 / nombrePas);
             sigmaE_stream << T << " " << sigmaE << endl;
+            
+            /* Writing configurations */
+            States.write_config(T);
             
         }//end for T
 

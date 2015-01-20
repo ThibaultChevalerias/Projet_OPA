@@ -1,6 +1,8 @@
 #include "Tensor.h"
 #include <cstdlib>
 #include <cmath>
+#include <string>
+#include <fstream>
 #include "fonctionsAnnexes.h"
 
 using namespace std;
@@ -37,6 +39,63 @@ void Tensor::init() // Random initialization
                 else
                 {
                     spins.push_back(1);
+                }
+            }
+        }
+    }
+}
+
+void Tensor::read_config(double T)
+{
+    string temperature;
+    temperature = to_string(T);
+    string const read_file("results/configs/config_T=" + temperature + ".dat");
+    
+    ifstream read_stream(read_file.c_str());
+    
+    char state;
+    
+    for(int i = 0; i < nx; i++)
+    {
+        for(int j = 0; j < ny; j++)
+        {
+            for(int k = 0; k < nz; k++)
+            {
+                read_stream.get(state);
+                if(state == '1')
+                {
+                    spins.push_back(1);
+                }
+                else
+                {
+                    spins.push_back(-1);
+                }
+            }
+        }
+    }
+}
+
+void Tensor::write_config(double T)
+{
+    string temperature;
+    temperature = to_string(T);
+    string const write_file("results/configs/config_T=" + temperature + ".dat");
+    
+    ofstream write_stream(write_file.c_str());
+    
+    for(int x = 0; x < nx; x++)
+    {
+        for(int y = 0; y < ny; y++)
+        {
+            for(int z = 0; z < nz; z++)
+            {
+                if(spins[x + nx * y + nx * ny * z] == 1)
+                {
+                    write_stream << 1;
+                }
+                else
+                {
+                    write_stream << 0;
                 }
             }
         }

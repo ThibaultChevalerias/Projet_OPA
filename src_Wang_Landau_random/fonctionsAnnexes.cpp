@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <vector>
 #include "fonctionsAnnexes.h"
 
 using namespace std;
@@ -25,7 +26,7 @@ int getMax(vector<int>& table) // It only works for integer tables
 {
     double max = table[0];
 
-    for(int i = 1; i < table.size(); i++)
+    for(unsigned int i = 1; i < table.size(); i++)
     {
         if(max < table[i])
         {
@@ -47,7 +48,7 @@ int getMin(vector<int>& table) // It only works for integer tables
 
     min = table[index];
 
-    for(int i = index + 1; i < table.size(); i++)
+    for(unsigned int i = index + 1; i < table.size(); i++)
     {
         if(min > table[i] && table[i] != 0)
         {
@@ -63,7 +64,7 @@ double getMean(vector<int>& table) // /!\ eliminates the 0 values in the table f
     double mean = 0;
     int count = 0;
 
-    for(int i = 0; i < table.size(); i++)
+    for(unsigned int i = 0; i < table.size(); i++)
     {
         if(table[i] != 0)
         {

@@ -26,11 +26,11 @@ int main()
     if(read_stream)
     {
         string line; // to jump the comment lines
-        
+
         getline(read_stream, line); // to jump the first line (comment)
         int number_lines = 0;
         read_stream >> number_lines; // read the first important line of the file : the number of data lines
-        
+
         getline(read_stream, line); // to jump the comment lines
         getline(read_stream, line); // to jump the comment lines
         read_stream >> nxnynz; // nxnynz = nx * ny * nz (number of sites)
@@ -68,9 +68,9 @@ int main()
     /* ========================================================== */
 
     /** TEMPERATURES À MIEUX EXPLICITER **/
-    double Tinit = 0.005; //Initial temperature (implicit kbT with kb=1)
-    double Tfinal = 0.02; // Final temperature (implicit kbT with kb=1)
-    double Tstep = 0.0001; // Temperature step (implicit kbT with kb=1)
+    double Tinit = 6; //Initial temperature (implicit kbT with kb=1)
+    double Tfinal = 10; // Final temperature (implicit kbT with kb=1)
+    double Tstep = 0.01; // Temperature step (implicit kbT with kb=1)
 
     vector< pair<double, double> > T_Cv; // Will contain the value of the temperature T and the corresponding value of the specific heat Cv
     double Cv = 0; // heat capacity
@@ -81,19 +81,19 @@ int main()
 
     string const Cv_file("Cv.dat"); // output file. Will allow to plot Cv in function of T, with gnuplot for instance
     ofstream Cv_stream(Cv_file.c_str()); // output stream
-
+    
     if(Cv_stream)
     {
         Cv_stream << "#T Cv" << endl;
-
+        
         for(double T = Tinit; T <= Tfinal; T += Tstep)
         {
             Cv = 0;
             Z = 0;
             mean_energy = 0;
             mean_square_energy = 0;
-
-            for(int i = 0; i < lngE.size(); i++)
+            
+            for(unsigned int i = 0; i < lngE.size(); i++)
             {
                 gEfE = exp(lngE[i].second - lngE_max - lngE[i].first / T); // represents g(E)f(E) = exp(ln(g(E)) - ln(g(E))_max - beta * E)
                 /* the "- ln(g(E))_max" is to avoid big numbers in the exponential. It does not change anything in the computation of Cv because
@@ -124,7 +124,7 @@ int main()
         /* ============================================================================================== */
         double max = T_Cv[0].second;
         int index_max = 0;
-        for (int i = 1; i < T_Cv.size(); i++)
+        for (unsigned int i = 1; i < T_Cv.size(); i++)
         {
             if (T_Cv[i].second > max)
             {
@@ -143,7 +143,6 @@ int main()
         cout << "Error while writing Cv.dat file !!!" << endl;
     }
 
-    system("PAUSE");
     return 0;
 
 }
