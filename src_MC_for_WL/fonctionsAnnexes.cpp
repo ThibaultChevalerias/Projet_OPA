@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <vector>
 #include "fonctionsAnnexes.h"
 
 using namespace std;
