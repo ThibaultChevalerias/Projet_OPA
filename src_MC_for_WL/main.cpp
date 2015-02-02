@@ -21,7 +21,9 @@ int main()
 
     double J0 = 1;
     double J1 = 1; // nearest neighbour interaction constant
-    double J2 = 0; // next-nearest neighbour interaction constant
+    double J2_min = -1;
+    double J2_max = 0;
+    double J2_step = 0.1;
     
     int nombrePas = 1000000; // Number of Monte-Carlo steps
     int x = 0;
@@ -52,138 +54,145 @@ int main()
 
     /* Initialisation de rand */
     srand(time(NULL));
-
-    /* Initialisation de l'état du système */
-    States.init();
-
-    /* Déclaration des flux pour écrire dans les fichier */
-    bool streams;
-
-    string const plot_file("results/results");
-    string const Cv_file("results/data/Cv.dat");
-    string const energy_file("results/data/energy.dat");
-    string const sigmaE_file("results/data/sigmaE.dat");
-
-    ofstream plot_stream(plot_file.c_str());
-    ofstream Cv_stream(Cv_file.c_str());
-    ofstream energy_stream(energy_file.c_str());
-    ofstream sigmaE_stream(sigmaE_file.c_str());
-
-    streams = plot_stream && Cv_stream && energy_stream && sigmaE_stream;
-
-    if(streams)
+    
+    string label;
+    
+    for(double J2 = J2_min; J2 <= J2_max; J2 += J2_step)
     {
-        /* Headers */
-        plot_stream << "#Parameters : nx = " << nx << "; ny = " << ny << "; nz = " << nz <<
-        "; J0 = " << J0 << "; J1 = " << J1 << "; J2 = " << J2 << "; number of steps = " << nombrePas << endl;
-        Cv_stream << "#Temperature Cv" << endl;
-        energy_stream << "#Temperature Mean_Energy" << endl;
-        sigmaE_stream << "#Temperature sigmaE^2" << endl;
+        /* Initialisation de l'état du système */
+        States.init();
 
-        /* Monte-Carlo temperature loop */
+        /* Déclaration des flux pour écrire dans les fichier */
+        bool streams;
+        
+        label = "_J2 = " + to_string(J2);
+        
+        string const plot_file("results/results" + label);
+        string const Cv_file("results/data/Cv" + label + ".dat");
+        string const energy_file("results/data/energy" + label + ".dat");
+        string const sigmaE_file("results/data/sigmaE" + label + ".dat");
 
-        for(double T = Tinit; T >= Tinf; T -= temperatureStep)
+        ofstream plot_stream(plot_file.c_str());
+        ofstream Cv_stream(Cv_file.c_str());
+        ofstream energy_stream(energy_file.c_str());
+        ofstream sigmaE_stream(sigmaE_file.c_str());
+
+        streams = plot_stream && Cv_stream && energy_stream && sigmaE_stream;
+
+        if(streams)
         {
-            cout << "T: " << T << endl;
+            /* Headers */
+            plot_stream << "#Parameters : nx = " << nx << "; ny = " << ny << "; nz = " << nz <<
+            "; J0 = " << J0 << "; J1 = " << J1 << "; J2 = " << J2 << "; number of steps = " << nombrePas << endl;
+            Cv_stream << "#Temperature Cv" << endl;
+            energy_stream << "#Temperature Mean_Energy" << endl;
+            sigmaE_stream << "#Temperature sigmaE^2" << endl;
 
-            /* We reinitialize the output variables */
-            E = 0;
-            sum_E = 0;
-            sum_E_square = 0;
-            DeltaE = 0;
+            /* Monte-Carlo temperature loop */
 
-            Cv = 0;
-            
-            /*******************************************/
-            /********** Monte-Carlo algorithm **********/
-            /*******************************************/
-            
-            for(int step = 0; step < nombrePas; step++)
+            for(double T = Tinit; T >= Tinf; T -= temperatureStep)
             {
-                /* We choose a random spin */
-                x = rand() % nx;
-                y = rand() % ny;
-                z = rand() % nz;
+                cout << "T: " << T << endl;
 
-                /* Calcul du DeltaE engendré */
-                DeltaE = States.getDeltaE(x, y, z, J0, J1, J2);
+                /* We reinitialize the output variables */
+                E = 0;
+                sum_E = 0;
+                sum_E_square = 0;
+                DeltaE = 0;
 
-                /* Decision taken */
-
-                if(DeltaE <= 0) // Si l'énergie finale est plus faible
+                Cv = 0;
+                
+                /*******************************************/
+                /********** Monte-Carlo algorithm **********/
+                /*******************************************/
+                
+                for(int step = 0; step < nombrePas; step++)
                 {
-                    States.switchValue(x, y, z); // On multiplie par -1 : on change l'état
-                }
-                else // Si l'énergie finale est plus élevée
-                {
-                    floattemp = rand() % 100000000 + 1; // float precision 1e8
-                    nombreEntre0Et1 = floattemp / 100000000;
-                    if(log(nombreEntre0Et1) < - DeltaE/T)
+                    /* We choose a random spin */
+                    x = rand() % nx;
+                    y = rand() % ny;
+                    z = rand() % nz;
+
+                    /* Calcul du DeltaE engendré */
+                    DeltaE = States.getDeltaE(x, y, z, J0, J1, J2);
+
+                    /* Decision taken */
+
+                    if(DeltaE <= 0) // Si l'énergie finale est plus faible
                     {
                         States.switchValue(x, y, z); // On multiplie par -1 : on change l'état
-                    } 
-                    else // nothing happens
-                    {
-                        DeltaE = 0;
                     }
-                }
+                    else // Si l'énergie finale est plus élevée
+                    {
+                        floattemp = rand() % 100000000 + 1; // float precision 1e8
+                        nombreEntre0Et1 = floattemp / 100000000;
+                        if(log(nombreEntre0Et1) < - DeltaE/T)
+                        {
+                            States.switchValue(x, y, z); // On multiplie par -1 : on change l'état
+                        } 
+                        else // nothing happens
+                        {
+                            DeltaE = 0;
+                        }
+                    }
+                    
+                    if(step == nombrePas/2)
+                    {
+                        E = States.getEnergy(J0, J1, J2);
+                        sum_E = E;
+                        sum_E_square = E * E;
+                    }
+
+                    if(step > nombrePas/2) // We keep the final half of the states to compute the averaged variables
+                    {
+                        E += DeltaE;
+                        sum_E += E;
+                        sum_E_square += E * E;
+                    }
+
+                }//end for nombrePas
+
+                /* Writing results */
                 
-                if(step == nombrePas/2)
-                {
-                    E = States.getEnergy(J0, J1, J2);
-                    sum_E = E;
-                    sum_E_square = E * E;
-                }
+                /* <E> = sum_E / number_of_spins */
+                energy_stream << T << " " << sum_E * 2 / nombrePas << endl;
+                
+                /* Cv = (1/kT^2) * (<E^2> - <E>^2) */
+                Cv = (2/(nombrePas*T*T)) * (sum_E_square - sum_E * sum_E * 2 / nombrePas);
+                Cv_stream << T << " " << Cv << endl;
+                
+                /* sigmaE^2 = (<E^2> - <E>^2) */
+                sigmaE = ((sum_E_square - sum_E * sum_E * 2 / nombrePas) * 2 / nombrePas);
+                sigmaE_stream << T << " " << sigmaE << endl;
+                
+                /* Writing configurations */
+                States.write_config(T, J2);
+                
+            }//end for T
 
-                if(step > nombrePas/2) // We keep the final half of the states to compute the averaged variables
-                {
-                    E += DeltaE;
-                    sum_E += E;
-                    sum_E_square += E * E;
-                }
-
-            }//end for nombrePas
-
-            /* Writing results */
+            plot_stream << "set xlabel 'T'" << endl
+                        << "set ylabel 'Cv'" << endl
+                        << "plot 'data/Cv.dat'" << endl
+                        << "pause -1" << endl
+                        
+                        << "set ylabel '<E>'" << endl
+                        << "plot 'data/energy.dat'" << endl
+                        << "pause -1" << endl
+                        
+                        << "set ylabel 'sigmaE^2'" << endl
+                        << "plot 'data/sigmaE.dat'" << endl
+                        << "pause -1" << endl;
             
-            /* <E> = sum_E / number_of_spins */
-            energy_stream << T << " " << sum_E * 2 / nombrePas << endl;
+            Cv_stream.close();
+            energy_stream.close();
+            sigmaE_stream.close();
+            plot_stream.close();
             
-            /* Cv = (1/kT^2) * (<E^2> - <E>^2) */
-            Cv = (2/(nombrePas*T*T)) * (sum_E_square - sum_E * sum_E * 2 / nombrePas);
-            Cv_stream << T << " " << Cv << endl;
-            
-            /* sigmaE^2 = (<E^2> - <E>^2) */
-            sigmaE = ((sum_E_square - sum_E * sum_E * 2 / nombrePas) * 2 / nombrePas);
-            sigmaE_stream << T << " " << sigmaE << endl;
-            
-            /* Writing configurations */
-            States.write_config(T, J2);
-            
-        }//end for T
-
-        plot_stream << "set xlabel 'T'" << endl
-                    << "set ylabel 'Cv'" << endl
-                    << "plot 'data/Cv.dat'" << endl
-                    << "pause -1" << endl
-                    
-                    << "set ylabel '<E>'" << endl
-                    << "plot 'data/energy.dat'" << endl
-                    << "pause -1" << endl
-                    
-                    << "set ylabel 'sigmaE^2'" << endl
-                    << "plot 'data/sigmaE.dat'" << endl
-                    << "pause -1" << endl;
-        
-        Cv_stream.close();
-        energy_stream.close();
-        sigmaE_stream.close();
-        plot_stream.close();
-        
-    }//end if(streams)
-    else
-    {
-        cout << "Error while opening files" << endl;
+        }//end if(streams)
+        else
+        {
+            cout << "Error while opening files" << endl;
+        }
     }
 
     return 0;
