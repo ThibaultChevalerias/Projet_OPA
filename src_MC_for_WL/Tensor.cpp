@@ -45,11 +45,14 @@ void Tensor::init() // Random initialization
     }
 }
 
-void Tensor::read_config(double T)
+void Tensor::read_config(double T, double J2)
 {
     string temperature;
+    string J;
+    
     temperature = to_string(T);
-    string const read_file("results/configs/config_T=" + temperature + ".dat");
+    J = to_string(J2);
+    string const read_file("results/configs/config_J2=" + J + "_T=" + temperature + ".dat");
     
     ifstream read_stream(read_file.c_str());
     
@@ -75,11 +78,14 @@ void Tensor::read_config(double T)
     }
 }
 
-void Tensor::write_config(double T)
+void Tensor::write_config(double T, double J2)
 {
     string temperature;
+    string J;
+    
     temperature = to_string(T);
-    string const write_file("results/configs/config_T=" + temperature + ".dat");
+    J = to_string(J2);
+    string const write_file("results/configs/config_J2=" + J + "_T=" + temperature + ".dat");
     
     ofstream write_stream(write_file.c_str());
     

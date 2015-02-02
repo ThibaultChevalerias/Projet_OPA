@@ -11,8 +11,8 @@ public:
     Tensor();
     Tensor(int n1, int n2, int n3);
     void init();
-    void read_config(double T);
-    void write_config(double T);
+    void read_config(double T, double J2);
+    void write_config(double T, double J2);
     double getEnergy(double J0, double J1, double J2);
     int getValue(int x,int y,int z);
     double getDeltaE(int x, int y, int z, double J0, double J1, double J2);

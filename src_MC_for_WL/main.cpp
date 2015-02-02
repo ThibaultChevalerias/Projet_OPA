@@ -30,9 +30,9 @@ int main()
     
     double nombreEntre0Et1 = 0;
     double floattemp = 0;
-    double temperatureStep = 0.05;
+    double temperatureStep = 0.1;
     double Tinit = 12;
-    double Tinf = 4;
+    double Tinf = 0.1;
 
     /* Variables for output*/
     /* Energy */
@@ -158,7 +158,7 @@ int main()
             sigmaE_stream << T << " " << sigmaE << endl;
             
             /* Writing configurations */
-            States.write_config(T);
+            States.write_config(T, J2);
             
         }//end for T
 
