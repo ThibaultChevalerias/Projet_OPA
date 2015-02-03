@@ -92,7 +92,7 @@ int main()
 
             for(double T = Tinit; T >= Tinf; T -= temperatureStep)
             {
-                cout << "T: " << T << endl;
+                cout << "J2: " << J2 << "; T: " << T << endl;
 
                 /* We reinitialize the output variables */
                 E = 0;
@@ -204,11 +204,11 @@ int main()
     double Emin = 0;
     double Emax = 0;
 
-    int numberPoints = 0; // the number of points/line in the energy file over which we want to compute the average min and max energies
-    int totalPoints = 0; // the number of points/line in the energy file
-    int jumpPoints = 0; // number of line we must jump in the middle of the file
+    int numberPoints = 0; // the number of points/lines in the energy file over which we want to compute the average min and max energies
+    int totalPoints = 0; // the number of points/lines in the energy file
+    int jumpPoints = 0; // number of lines we must jump in the middle of the file
 
-    totalPoints = ((Tinit - Tinf)/temperatureStep) + 1;
+    totalPoints = ((Tinit - Tinf) / temperatureStep) + 1;
     numberPoints = totalPoints * 0.05;
     jumpPoints = totalPoints - 2 * numberPoints;
 
@@ -246,7 +246,7 @@ int main()
                 Emax += E_buff;
             }
 
-            Emax/=numberPoints;
+            Emax /= numberPoints;
 
             getline(read_energy_stream, line); // jump to the next line, because after the last >>, we were at the end of the line, and not at the beginning of the following line
 
@@ -265,7 +265,7 @@ int main()
                 Emin += E_buff;
             }
 
-            Emin/=numberPoints;
+            Emin /= numberPoints;
 
             //writting in configWL file
             configWL_stream << J2 << " " << Emin << " " << Emax << endl;
