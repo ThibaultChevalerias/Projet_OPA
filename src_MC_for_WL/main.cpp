@@ -193,6 +193,90 @@ int main()
         {
             cout << "Error while opening files" << endl;
         }
+    } // end for J2
+
+
+
+    /*******************************************/
+    /*********** Config file for WL ************/
+    /*******************************************/
+
+    double Emin = 0;
+    double Emax = 0;
+
+    int numberPoints = 0; // the number of points/line in the energy file over which we want to compute the average min and max energies
+    int totalPoints = 0; // the number of points/line in the energy file
+    int jumpPoints = 0; // number of line we must jump in the middle of the file
+
+    totalPoints = ((Tinit - Tinf)/temperatureStep) + 1;
+    numberPoints = totalPoints * 0.05;
+    jumpPoints = totalPoints - 2 * numberPoints;
+
+    string const configWL_file("results/configWL");
+
+    ofstream configWL_stream(configWL_file.c_str());
+
+    configWL_stream << "#J2 Emin Emax" << endl;
+
+    if(configWL_stream)
+    {
+        for(double J2 = J2_min; J2 <= J2_max; J2 += J2_step)
+        {
+            Emin = 0;
+            Emax = 0;
+
+            label = "_J2 = " + to_string(J2);
+
+            string const read_energy_file("results/data/energy" + label + ".dat");
+
+            ifstream read_energy_stream(read_energy_file.c_str());
+
+            string line; // allows to jump lines
+            double T_buff; // stores T values temporarily
+            double E_buff; // stores E values temporarily
+
+            getline(read_energy_stream, line); // jump the first comment line
+
+            //computation of the mean max Energy
+            for(int i = 0; i < numberPoints ; i++)
+            {
+                read_energy_stream >> T_buff;
+                read_energy_stream >> E_buff;
+
+                Emax += E_buff;
+            }
+
+            Emax/=numberPoints;
+
+            getline(read_energy_stream, line); // jump to the next line, because after the last >>, we were at the end of the line, and not at the beginning of the following line
+
+            //jump some lines
+            for(int i = 0 ; i < jumpPoints ; i++)
+            {
+                getline(read_energy_stream, line);
+            }
+
+            //computation of the mean min Energy
+            for(int i = 0; i < numberPoints ; i++)
+            {
+                read_energy_stream >> T_buff;
+                read_energy_stream >> E_buff;
+
+                Emin += E_buff;
+            }
+
+            Emin/=numberPoints;
+
+            //writting in configWL file
+            configWL_stream << J2 << " " << Emin << " " << Emax << endl;
+
+        } // end for J2
+
+    } // end if(configWL_stream)
+
+    else
+    {
+        cout << "Error while opening configWL file !" << endl;
     }
 
     return 0;
