@@ -15,17 +15,18 @@ int main()
     cout << "Wait while the simulation is running..." << endl;
 
     /* Déclaration des variables */
-    int nx = 12;
-    int ny = 12;
-    int nz = 12;
+    int nx = 10;
+    int ny = 10;
+    int nz = 40;
 
     double J0 = 1;
     double J1 = 1; // nearest neighbour interaction constant
-    double J2_min = -1;
-    double J2_max = 0;
+    double J2_min = - 1;
+    double J2_max = 0.4;
     double J2_step = 0.1;
     
-    int nombrePas = 1000000; // Number of Monte-Carlo steps
+    int nombrePas = 5000 * nx * ny * nz; // Number of Monte-Carlo steps
+    // it is an order of magnitude, 1000 steps per spin seem good, but more might be needed.
     int x = 0;
     int y = 0;
     int z = 0;
@@ -33,7 +34,7 @@ int main()
     double nombreEntre0Et1 = 0;
     double floattemp = 0;
     double temperatureStep = 0.1;
-    double Tinit = 12;
+    double Tinit = 11;
     double Tinf = 0.1;
 
     /* Variables for output*/
@@ -65,7 +66,8 @@ int main()
         /* Déclaration des flux pour écrire dans les fichier */
         bool streams;
         
-        label = "_J2 = " + to_string(J2);
+        label = "_J2 = " + to_string(J2) + "_" + to_string(nx) + "x" + to_string(ny) + "x" +to_string(nz);
+        // /!\ WANRING: if you modify this label, you also have to change the other label at the end of the code, when the WL_config file is created.
         
         string const plot_file("results/results" + label);
         string const Cv_file("results/data/Cv" + label + ".dat");
@@ -172,15 +174,15 @@ int main()
 
             plot_stream << "set xlabel 'T'" << endl
                         << "set ylabel 'Cv'" << endl
-                        << "plot 'data/Cv.dat'" << endl
+                        << "plot 'data/Cv" << label << ".dat'" << endl
                         << "pause -1" << endl
                         
                         << "set ylabel '<E>'" << endl
-                        << "plot 'data/energy.dat'" << endl
+                        << "plot 'data/energy" << label << ".dat'" << endl
                         << "pause -1" << endl
                         
                         << "set ylabel 'sigmaE^2'" << endl
-                        << "plot 'data/sigmaE.dat'" << endl
+                        << "plot 'data/sigmaE" << label << ".dat'" << endl
                         << "pause -1" << endl;
             
             Cv_stream.close();
@@ -212,7 +214,7 @@ int main()
     numberPoints = totalPoints * 0.05;
     jumpPoints = totalPoints - 2 * numberPoints;
 
-    string const configWL_file("results/configWL");
+    string const configWL_file("results/configWL_" + to_string(nx) + "x" + to_string(ny) + "x" +to_string(nz));
 
     ofstream configWL_stream(configWL_file.c_str());
 
@@ -225,7 +227,7 @@ int main()
             Emin = 0;
             Emax = 0;
 
-            label = "_J2 = " + to_string(J2);
+            label = "_J2 = " + to_string(J2) + "_" + to_string(nx) + "x" + to_string(ny) + "x" +to_string(nz);
 
             string const read_energy_file("results/data/energy" + label + ".dat");
 

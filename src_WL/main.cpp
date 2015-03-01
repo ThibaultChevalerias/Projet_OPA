@@ -17,26 +17,28 @@ int main()
     /* ================================================================== */
     
     /* Size of the spin box */
-    int nx = 12;
-    int ny = 12;
-    int nz = 12;
+    int nx = 10;
+    int ny = 10;
+    int nz = 56;
     
     /* Exchange constants */
     double J0 = 1; // plane (x,y) ferromagnetic here
     double J1 = 1; // nearest neighbours following the z axis (ferro here)
-    double J2 = -1; // next nearest neighbours following the z axis (may be ferro or antiferro)
+    double J2 = - 1; // next nearest neighbours following the z axis (may be ferro or antiferro)
     
-    double T_source = 7;
+    double T_source = 6.5;
     
     /* Wang-Landau parameters */
     double lnf = 1;
-    double epsilon = 1.0/100000000; // precision, typical value: 1/1e8
+    double epsilon = 1.0/10;//0000000; // precision, typical value: 1/1e8
     
     double flatness_limit = 0.80; // When we reach this limit, we consider the histogram as flat, and change the value of f.
     
     int step = 0;
-    int step_max = 1000000000; // Maximum number of steps allowed for the flatness to get above flatness_limit
-    int missed_steps = 0; //see algorithm
+    double step_max = 10000000000; // Maximum number of steps allowed for the flatness to get above flatness_limit
+    int missed_steps = 0; // see algorithm
+    double limit_step = 0; // see algorith; needs to be a double because it can get too big for an int
+    int counter_billions = 0; // see algorithm; counts the billions we remove because the step's number is too high
     
     /* Variables to choose a random spin */
     int x = 0;
@@ -50,9 +52,9 @@ int main()
     double random_range = 100000000; // float precision (1e8)
     
     /* Energy bins */
-    double E_max = - 2500;
-    double E_min = - 10300;
-    int const number_bins = 5000; // We cut the energy interval in number_bins bins
+    double E_max = - 9500;
+    double E_min = - 29000;
+    int const number_bins = 10000; // We cut the energy interval in number_bins bins
     double deltaE = (E_max - E_min) / number_bins; // Energy range of each bin
     double rescale = abs(E_min) + deltaE;
 
@@ -79,12 +81,12 @@ int main()
     
     Tensor System(nx, ny, nz);
     
-    System.read_config(T_source, J2); // We have chosen T=8 for now
+    System.read_config(T_source, J2); // We have chosen T=6.5 for now
     
     /* Declaration of streams (data output) */
     
-    string const lngE_file("results/lng(E)_J2=" + to_string(J2) + ".dat");
-    string const error_file("results/errors_J2=" + to_string(J2) + ".dat");
+    string const lngE_file("results/lng(E)_J2=" + to_string(J2) + "_" + to_string(nx) + "x" + to_string(ny) + "x" + to_string(nz) + ".dat");
+    string const error_file("results/errors_J2=" + to_string(J2) + "_" + to_string(nx) + "x" + to_string(ny) + "x" + to_string(nz) + ".dat");
     
     ofstream lngE_stream(lngE_file.c_str());
     ofstream error_stream(error_file.c_str());
@@ -99,20 +101,23 @@ int main()
         /* ==================== Wang-Landau algorithm ==================== */
         /* =============================================================== */
         
-        cout << "Wait while the simulation is running..." << endl;
-        
+        cout << "Wait while the simulation is running..." << endl << endl;
+
         currentEnergy = System.getEnergy(J0, J1, J2) + rescale; // initialisation of the (computation of the) energy
         // For the rescale, see declaration of variables, we have translated the zero of energy
         currentBin = locateBin(E_min, deltaE, currentEnergy); // idem for the current bin
-
+        
         while(lnf >= epsilon)
         {
-            cout << endl << "lnf = " << lnf << endl << endl;
+            cout << "lnf = " << lnf << endl << endl;
 
             step = 0;
             missed_steps = 0;
             
-            while(step <= (step_max / sqrt(lnf)))
+            counter_billions = 0;
+            limit_step = step_max / sqrt(lnf); // indeed, when lnf gets smaller, we need more steps
+            
+            while(step <= limit_step)
             {
                 /* We propose a new state */
                 x = rand() % nx;
@@ -156,25 +161,29 @@ int main()
                 {
                     if(isFlat(flatness_limit, visits))
                     {
-                        cout << step / 1000000 << " million" << endl;
+                        cout << 1000 * counter_billions + step / 1000000 << " million" << endl;
                         cout << "missed steps: " << missed_steps << endl << endl;
                         cout << "**************************************************" << endl;
                         cout << "********** The histogram is flat enough **********" << endl;
                         cout << "**************************************************" << endl << endl;
+                        
+                        error_stream << lnf << ": no problem, flatness achieved"; // if the flatness is achieved, we write it in the error_file
                         break;
                     }
                 }
                 
-                if(step % 10000000 == 0)
+                if(step % 100000000 == 0) // we show only a few steps in order to follow the program easily
                 {
-                    cout << step / 1000000 << " million" << endl;
-                    cout << "missed steps: " << missed_steps << endl;
+                    cout << 1000 * counter_billions + step / 1000000 << " million" << endl;
+                    cout << "missed steps: " << missed_steps / 1000000.0 << " million" << endl;
                 }
                 
-                // if the flatness is not achieved, we write an error: 
-                if(step == (step_max / sqrt(lnf)))
+                if(step % 1000000000 == 0) // above approximately 2 billion, the number of steps will be too big for this int.
                 {
-                    error_stream << lnf << ": flatness not achieved" << endl;
+                    cout << endl << "rescaling: we remove 1 billion" << endl << "reminder: lnf = " << lnf << endl << endl;
+                    counter_billions ++;
+                    step = 0; // thus we reinitialize the counter.
+                    limit_step -= 1000000000; // and we update the limit by removing the current number of steps
                 }
                 
             } // end while(step < step_max)
@@ -183,6 +192,8 @@ int main()
             {
                 visits[i] = 0; // We reinitialize the histogram of visits
             }
+            
+            error_stream << "; " << lnf << " --> " << lnf/2 << endl; // if the flatness has not been achieved, there will be a line in the error file without "flatness achieved (see above)
             
             lnf /= 2; // We reduce f until f < epsilon
         

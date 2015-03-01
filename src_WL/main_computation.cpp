@@ -15,9 +15,13 @@ int main()
 
     vector< pair<double, double> > lngE; // Will contain the energy (mean energy of a bin) and the value of lng(E) for this energy
     
-    double J2 = - 0.4;
+    int nx = 10;
+    int ny = 10;
+    int nz = 56;
     
-    string const read_file("results/lng(E)_J2=" + to_string(J2) + ".dat"); // path may be modified to read the appropriate file. This file is the output file of the Wang-landau algorithm code 
+    double J2 = - 1;
+    
+    string const read_file("results/lng(E)_J2=" + to_string(J2) + "_" + to_string(nx) + "x" + to_string(ny) + "x" + to_string(nz) + ".dat"); // path may be modified to read the appropriate file. This file is the output file of the Wang-landau algorithm code 
     ifstream read_stream(read_file.c_str()); // reading stream
     
     int nxnynz = 0; // cannot be declared in the next "if" because it is used later
@@ -75,7 +79,7 @@ int main()
     /* ========================================================== */
 
     /** TEMPERATURES À MIEUX EXPLICITER **/
-    double Tinit = 0.001; //Initial temperature (implicit kbT with kb=1)
+    double Tinit = 1; //Initial temperature (implicit kbT with kb=1)
     double Tfinal = 10; // Final temperature (implicit kbT with kb=1)
     double Tstep = 0.001; // Temperature step (implicit kbT with kb=1)
 
@@ -85,10 +89,10 @@ int main()
     long double mean_square_energy = 0;
     long double gEfE = 0; // represents g(E)f(E) = exp(ln(g(E)) - beta * E)
 
-    string const Cv_file("results/Cv_J2=" + to_string(J2) + ".dat"); // output file. Will allow to plot Cv in function of T, with gnuplot for instance
+    string const Cv_file("results/Cv_J2=" + to_string(J2) + "_" + to_string(nx) + "x" + to_string(ny) + "x" + to_string(nz) + ".dat"); // output file. Will allow to plot Cv in function of T, with gnuplot for instance
     ofstream Cv_stream(Cv_file.c_str()); // output stream
     
-    string const energy_file("results/energy_J2=" + to_string(J2) + ".dat"); // output file. Will allow to plot Cv in function of T, with gnuplot for instance
+    string const energy_file("results/energy_J2=" + to_string(J2) + "_" + to_string(nx) + "x" + to_string(ny) + "x" + to_string(nz) + ".dat"); // output file. Will allow to plot Cv in function of T, with gnuplot for instance
     ofstream energy_stream(energy_file.c_str()); // output stream
     
     if(Cv_stream && energy_stream)

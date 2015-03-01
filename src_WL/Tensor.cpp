@@ -3,6 +3,7 @@
 #include <cmath>
 #include <string>
 #include <fstream>
+#include <iostream>
 #include "fonctionsAnnexes.h"
 
 using namespace std;
@@ -26,11 +27,11 @@ void Tensor::init() // Random initialization
 
     spins.clear(); // We remove all previous elements
 
-    for(int i = 0; i < nx; i++)
+    for(int k = 0; k < nz; k++)
     {
         for(int j = 0; j < ny; j++)
         {
-            for(int k = 0; k < nz; k++)
+            for(int i = 0; i < nx; i++)
             {
                 if(rand() % 2 < 1)
                 {
@@ -52,29 +53,36 @@ void Tensor::read_config(double T, double J2)
     
     temperature = to_string(T);
     J = to_string(J2);
-    string const read_file("results/configs/config_J2=" + J + "_T=" + temperature + ".dat");
+    string const read_file("results/configs_" + to_string(nx) + "x" + to_string(ny) + "x" +to_string(nz) + "/config_J2=" + J + "_T=" + temperature + ".dat");
     
     ifstream read_stream(read_file.c_str());
     
-    char state;
-    
-    for(int i = 0; i < nx; i++)
+    if(read_stream)
     {
-        for(int j = 0; j < ny; j++)
+        char state;
+        
+        for(int k = 0; k < nz; k++)
         {
-            for(int k = 0; k < nz; k++)
+            for(int j = 0; j < ny; j++)
             {
-                read_stream.get(state);
-                if(state == '1')
+                for(int i = 0; i < nx; i++)
                 {
-                    spins.push_back(1);
-                }
-                else
-                {
-                    spins.push_back(-1);
+                    read_stream.get(state);
+                    if(state == '1')
+                    {
+                        spins.push_back(1);
+                    }
+                    else
+                    {
+                        spins.push_back(-1);
+                    }
                 }
             }
         }
+    }
+    else
+    {
+        cout << "Failed to open file " << read_file << endl;
     }
 }
 
@@ -85,26 +93,33 @@ void Tensor::write_config(double T, double J2)
     
     temperature = to_string(T);
     J = to_string(J2);
-    string const write_file("results/configs/config_J2=" + J + "_T=" + temperature + ".dat");
+    string const write_file("results/configs_" + to_string(nx) + "x" + to_string(ny) + "x" +to_string(nz) + "/config_J2=" + J + "_T=" + temperature + ".dat");
     
     ofstream write_stream(write_file.c_str());
     
-    for(int x = 0; x < nx; x++)
+    if(write_stream)
     {
-        for(int y = 0; y < ny; y++)
+        for(int z = 0; z < nz; z++)
         {
-            for(int z = 0; z < nz; z++)
+            for(int y = 0; y < ny; y++)
             {
-                if(spins[x + nx * y + nx * ny * z] == 1)
+                for(int x = 0; x < nx; x++)
                 {
-                    write_stream << 1;
-                }
-                else
-                {
-                    write_stream << 0;
+                    if(spins[x + nx * y + nx * ny * z] == 1)
+                    {
+                        write_stream << 1;
+                    }
+                    else
+                    {
+                        write_stream << 0;
+                    }
                 }
             }
         }
+    }
+    else
+    {
+        cout << "Failed to open file " << write_file << endl;
     }
 }
 
@@ -112,11 +127,11 @@ double Tensor::getEnergy(double J0, double J1, double J2) // Computes and return
 {
     double E = 0;
 
-    for(int x = 0; x < nx; x++)
+    for(int z = 0; z < nz; z++)
     {
         for(int y = 0; y < ny; y++)
         {
-            for(int z = 0; z < nz; z++)
+            for(int x = 0; x < nx; x++)
             {
                 /* There is a -= because there is a minus sign in the exchange Hamiltonian */
                 E -= spins[x + nx * y + nx * ny * z] *
@@ -154,11 +169,11 @@ int Tensor::getMagnetization() // Computes and returns the total magnetization o
 {
     int magnetization = 0;
 
-    for(int i = 0; i < nx; i++)
+    for(int k = 0; k < nz; k++)
     {
         for(int j = 0; j < ny; j++)
         {
-            for(int k = 0; k < nz; k++)
+            for(int i = 0; i < nx; i++)
             {
                 magnetization += spins[i + nx * j + nx * ny * k];
             }
@@ -174,9 +189,9 @@ int Tensor::getMagnetizationPlane(int z) // Computes and returns the value of th
     
     int magnetizationPlane = 0;
 
-    for(int i = 0; i < nx; i++)
+    for(int j = 0; j < ny; j++)
     {
-        for(int j = 0; j < ny; j++)
+        for(int i = 0; i < nx; i++)
         {
             magnetizationPlane += spins[i + nx * j + nx * ny * z];
         }
@@ -195,9 +210,9 @@ int Tensor::getSumMagnetizationPlanes() // Computes and returns the sum of the a
     {
         int magnetizationPlane = 0;
 
-        for(int i = 0; i < nx; i++)
+        for(int j = 0; j < ny; j++)
         {
-            for(int j = 0; j < ny; j++)
+            for(int i = 0; i < nx; i++)
             {
                 magnetizationPlane += spins[i + nx * j + nx * ny * k];
             }
@@ -215,11 +230,11 @@ int Tensor::getAFMCriterium() // The AFM criterium consists in computing a sum w
     
     int criterium = 0;
 
-    for(int i = 0; i < nx; i++)
+    for(int k = 0; k < nz; k++)
     {
         for(int j = 0; j < ny; j++)
         {
-            for(int k = 0; k < nz; k++)
+            for(int i = 0; i < nx; i++)
             {
                 // If the z+1 and z-1 spins are opposed, the criterium gets +1, otherwise -1
                 criterium += - spins[i + nx * j + nx * ny * mod(k - 1, nz)] * spins[i + nx * j + nx * ny * mod(k + 1, nz)];
