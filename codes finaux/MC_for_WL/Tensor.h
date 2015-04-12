@@ -33,7 +33,7 @@ class Tensor
         int ny; // The number of spins along y
         int nz; // The number of spins along z
         vector <int> spins; // The table 'spins' contains the state of every spin in the system (1 for 'up' and -1 for 'down').
-        /*** The spins are ardered as follows: first we put nx spins along x (for z = y = 0), then we go to y = 1 and continue ; when y = ny-1, we go to z = 1 and continue, etc. Basically, they are ordered first along x, then along y, then along z.
+        /*** The spins are ordered as follows: first we put nx spins along x (for z = y = 0), then we go to y = 1 and continue ; when y = ny-1, we go to z = 1 and continue, etc. Basically, they are ordered first along x, then along y, then along z.
         In more detail:
         * spins[0], spins[1], ..., spins[nx-1] are the spins along x (from 0 to nx-1) for y = z = 0,
         * spins[nx], spins[nx+1], ..., spins[2*nx-1] are the spins along x for z = 0, y = 1,
