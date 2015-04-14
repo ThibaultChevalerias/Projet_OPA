@@ -44,9 +44,9 @@ int main()
 
     /* Declaration of variables for a 'for' loop over the temperature. The loop goes from high temperatures to low temperatures */
     // Remark : this variable is without dimension. It is not a real temperature.
-    double temperatureStep = 0.1;
-    double Tinit = 11;
-    double Tinf = 0.1;
+    double temperatureStep = 0.1; // Temperature step (implicit kbT with kb=1)
+    double Tinit = 11; //Initial temperature (implicit kbT with kb=1)
+    double Tinf = 0.1; // Final temperature (implicit kbT with kb=1)
 
     /* Variables for output*/
     /* Energy */
